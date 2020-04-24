@@ -8,7 +8,7 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 
-class CanvasView : View {
+class CanvasView : View, OnScaleChangedListener {
 
     constructor(context: Context) : super(context)
 
@@ -17,8 +17,16 @@ class CanvasView : View {
     constructor(context: Context, attr: AttributeSet, defStyleAttr: Int) : super(context, attr, defStyleAttr)
 
     private val list = mutableListOf<Bitmap>()
-    private var viewHeight : Int = 0
+    private var canvasWidth  : Int = 0
+    private var canvasHeight : Int = 0
     private val displaySize = Point()
+
+    private var isScaling = false
+
+    private var scaleFactor = 1f
+    private var focusX = 0f
+    private var focusY = 0f
+
 
     init {
         (context as AppCompatActivity).windowManager.defaultDisplay.getSize(displaySize)
@@ -34,21 +42,31 @@ class CanvasView : View {
         paint.color = context.getColor(R.color.colorPrimaryDark)
         paint.textSize = 50f
 
-
         var index = 1
-        var height = 0
+        var sumHeight = 0
+
+        canvas.save()
+//        if(isScaling) {
+//            canvas.scale(scaleFactor, scaleFactor, focusX, focusY)
+//        }
+
         list.forEach {
             val src = Rect(0, 0, it.width, it.height)
             val left = getStartPosition(it.width)
-            val dst = Rect(left, height, left+it.width, height+it.height)
-            Log.d(TAG, "onDraw Page:$index Src:$src Dst:$dst")
+            val dst = Rect(left, sumHeight, left + it.width, sumHeight + it.height)
+//            Log.d(TAG, "onDraw Page:$index Src:$src Dst:$dst")
             canvas.drawBitmap(it, src, dst, null)
             canvas.drawText("Page:$index", 10f, (dst.top + 50f), paint)
 
             index += 1
-            height += 10
-            height += it.height
+            sumHeight += 10
+            sumHeight += it.height
         }
+        canvasWidth = canvas.width
+        canvasHeight = canvas.height
+        canvas.restore()
+
+//        setMeasuredDimension(width, viewHeight)
     }
 
     // 음수가 나올 수 있음.
@@ -57,13 +75,46 @@ class CanvasView : View {
     fun addBitmap(bitmap: Bitmap) {
         Log.d(TAG, "addBitmap width:${bitmap.width} height:${bitmap.height}")
         list.add(bitmap)
-        viewHeight += 10
-        viewHeight += bitmap.height
+        canvasWidth = displaySize.x
+        canvasHeight += 10
+        canvasHeight += bitmap.height
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        Log.d(TAG, "onMeasure width:$widthMeasureSpec/$width height:$heightMeasureSpec/$height/$viewHeight")
-        setMeasuredDimension(widthMeasureSpec, viewHeight)
+        Log.d(TAG, "onMeasure width:$widthMeasureSpec/$width/$canvasWidth height:$heightMeasureSpec/$height/$canvasHeight")
+//        setMeasuredDimension(widthMeasureSpec, canvasHeight)
+        setMeasuredDimension(canvasWidth, canvasHeight)
+    }
+
+    override fun onScaleChange(scaleFactor: Float, focusX: Float, focusY: Float): Boolean {
+        Log.d(TAG, "onScaleChange ScaleFactor:$scaleFactor FocusX:$focusX FocusY:$focusY")
+//        scaleX = scaleFactor
+//        scaleY = scaleFactor
+        isScaling = true
+
+//        val matrix = Matrix()
+//        matrix.postScale(scaleFactor, scaleFactor, focusX, focusX)
+
+        this.scaleFactor *= scaleFactor
+        this.focusX = focusX
+        this.focusY = focusY
+
+//        requestLayout()
+        invalidate()
+        return true
+    }
+
+    override fun onScaleStart(): Boolean {
+        Log.d(TAG, "onScaleStart")
+        isScaling = true
+        scaleFactor = 1f
+        return true
+    }
+
+    override fun onScaleEnd() {
+        Log.d(TAG, "onScaleEnd")
+        isScaling = false
+        scaleFactor = 1f
     }
 
     companion object {

@@ -82,11 +82,12 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, View.O
         Log.d(TAG, "onTouch Action:${event?.action}")
         val ret = scaleGestureDetector.onTouchEvent(event)
         Log.d(TAG, "onTouch Return:$ret")
-        return ret
+        return false
     }
 
     override fun onScaleChange(scaleFactor: Float, focusX: Float, focusY: Float): Boolean {
         Log.d(TAG, "onScaleChange ScaleFactor:$scaleFactor FocusX:$focusX FocusY:$focusY")
+        canvasView.onScaleChange(scaleFactor, focusX, focusY)
         return true
     }
 
