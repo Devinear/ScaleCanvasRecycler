@@ -9,6 +9,7 @@ import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 
 class CanvasView : View {
 
@@ -20,6 +21,11 @@ class CanvasView : View {
 
     private val list = mutableListOf<Bitmap>()
     private var viewHeight : Int = 0
+    private val displaySize = Point()
+
+    init {
+        (context as AppCompatActivity).windowManager.defaultDisplay.getSize(displaySize)
+    }
 
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
