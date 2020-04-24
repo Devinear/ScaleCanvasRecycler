@@ -19,6 +19,8 @@ class CanvasView : View, OnScaleChangedListener {
     private val list = mutableListOf<Bitmap>()
     private var canvasWidth  : Int = 0
     private var canvasHeight : Int = 0
+    private var scaleWidth  : Int = 0
+    private var scaleHeight : Int = 0
     private val displaySize = Point()
 
     private var isScaling = false
@@ -26,6 +28,8 @@ class CanvasView : View, OnScaleChangedListener {
     private var scaleFactor = 1f
     private var focusX = 0f
     private var focusY = 0f
+
+    var listener : OnViewChangedListener? = null
 
 
     init {
@@ -46,9 +50,9 @@ class CanvasView : View, OnScaleChangedListener {
         var sumHeight = 0
 
         canvas.save()
-//        if(isScaling) {
-//            canvas.scale(scaleFactor, scaleFactor, focusX, focusY)
-//        }
+        if(isScaling) {
+            canvas.scale(scaleFactor, scaleFactor, focusX, focusY)
+        }
 
         list.forEach {
             val src = Rect(0, 0, it.width, it.height)
@@ -62,11 +66,20 @@ class CanvasView : View, OnScaleChangedListener {
             sumHeight += 10
             sumHeight += it.height
         }
-        canvasWidth = canvas.width
-        canvasHeight = canvas.height
+        canvasHeight = sumHeight
+//        canvasWidth = canvas.width
+//        canvasHeight = canvas.height
+
+        if(isScaling) {
+//            scaleWidth = (canvasWidth*scaleFactor).toInt()
+            scaleHeight = (canvasHeight*scaleFactor).toInt()
+        }
+
         canvas.restore()
 
 //        setMeasuredDimension(width, viewHeight)
+
+        listener?.onViewSize(width = scaleWidth, height = scaleHeight)
     }
 
     // 음수가 나올 수 있음.
@@ -78,16 +91,22 @@ class CanvasView : View, OnScaleChangedListener {
         canvasWidth = displaySize.x
         canvasHeight += 10
         canvasHeight += bitmap.height
+
+        scaleWidth = canvasWidth
+        scaleHeight = canvasHeight
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         Log.d(TAG, "onMeasure width:$widthMeasureSpec/$width/$canvasWidth height:$heightMeasureSpec/$height/$canvasHeight")
 //        setMeasuredDimension(widthMeasureSpec, canvasHeight)
-        setMeasuredDimension(canvasWidth, canvasHeight)
+        setMeasuredDimension(scaleWidth, scaleHeight)
     }
 
     override fun onScaleChange(scaleFactor: Float, focusX: Float, focusY: Float): Boolean {
-        Log.d(TAG, "onScaleChange ScaleFactor:$scaleFactor FocusX:$focusX FocusY:$focusY")
+        Log.d(TAG, "onScaleChange ScaleFactor:$scaleFactor/${this.scaleFactor} FocusX:$focusX FocusY:$focusY")
+        if((this.scaleFactor == 0.8f && scaleFactor < 1) || (this.scaleFactor == 2f && scaleFactor > 1))
+            return false
+
 //        scaleX = scaleFactor
 //        scaleY = scaleFactor
         isScaling = true
@@ -96,11 +115,16 @@ class CanvasView : View, OnScaleChangedListener {
 //        matrix.postScale(scaleFactor, scaleFactor, focusX, focusX)
 
         this.scaleFactor *= scaleFactor
+        if(this.scaleFactor < 0.8f)
+            this.scaleFactor = 0.8f
+        else if(this.scaleFactor > 2f)
+            this.scaleFactor = 2f
+
         this.focusX = focusX
         this.focusY = focusY
 
-//        requestLayout()
-        invalidate()
+//        invalidate()
+        requestLayout()
         return true
     }
 

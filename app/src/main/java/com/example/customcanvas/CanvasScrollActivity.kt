@@ -1,11 +1,9 @@
 package com.example.customcanvas
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Bundle
-import android.util.AttributeSet
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -13,9 +11,10 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.Button
 import android.widget.ScrollView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
-class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, View.OnTouchListener {
+class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnViewChangedListener, View.OnTouchListener {
 
     lateinit var scrollView : ScrollView
     lateinit var canvasView : CanvasView
@@ -23,6 +22,9 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, View.O
     lateinit var btAdd : Button
     lateinit var btUp : Button
     lateinit var btDown : Button
+
+    lateinit var tvFirst : TextView
+    lateinit var tvSecond: TextView
 
     private var tempBitmap: Bitmap? = null
 
@@ -37,6 +39,8 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, View.O
 
         scrollView = findViewById(R.id.scrollView)
         canvasView = findViewById(R.id.canvasView)
+        canvasView.listener = this
+
         btAdd = findViewById(R.id.btn_add)
         btAdd.setOnClickListener { clickAddBitmap() }
         btUp = findViewById(R.id.btn_up)
@@ -44,10 +48,13 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, View.O
         btDown = findViewById(R.id.btn_down)
         btDown.setOnClickListener { clickDownScroll() }
 
+        tvFirst = findViewById(R.id.tv_first)
+        tvSecond= findViewById(R.id.tv_second)
+
         gestureDetector = GestureDetector(applicationContext, GestureListener())
         scaleGestureDetector = ScaleGestureDetector(applicationContext, ScaleGestureListener(this))
 
-        for(i in 0..50) {
+        for(i in 0..10) {
             clickAddBitmap()
         }
         scrollView.setOnTouchListener(this)
@@ -62,8 +69,9 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, View.O
             canvas.drawColor(Color.RED)
         }
         canvasView.addBitmap(tempBitmap!!)
-//        canvasView.invalidate()
-        canvasView.requestLayout()
+
+//      canvasView.invalidate()    // invalidate는 size가 변경되지 않는다.
+        canvasView.requestLayout() // onMeasure를 호출하므로 size가 변경된다.
 
         scrollView.smoothScrollTo(0, canvasView.height)
     }
@@ -98,6 +106,12 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, View.O
 
     override fun onScaleEnd() {
         Log.d(TAG, "onScaleEnd")
+    }
+
+    override fun onViewSize(width: Int, height: Int) {
+        Log.d(TAG, "onScaleEnd Width:$width Height:$height")
+        tvFirst.text = "Width:$width"
+        tvSecond.text = "Height:$height"
     }
 
     companion object {

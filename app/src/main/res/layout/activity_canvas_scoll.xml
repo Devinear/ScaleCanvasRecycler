@@ -9,6 +9,8 @@
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:scrollbarSize="10dp"
         android:background="@android:color/holo_orange_light" >
         <com.example.customcanvas.CanvasView
             android:id="@+id/canvasView"
@@ -18,12 +20,23 @@
     </ScrollView>
 
     <TextView
+        android:id="@+id/tv_first"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:text="CANVAS"
+        android:text="FIRST"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_second"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="SECOND"
+        app:layout_constraintTop_toBottomOf="@id/tv_first"
+        app:layout_constraintStart_toStartOf="parent" />
+
 
     <Button
         android:id="@+id/btn_add"
