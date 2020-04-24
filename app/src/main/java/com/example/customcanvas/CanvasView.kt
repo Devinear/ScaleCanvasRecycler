@@ -51,6 +51,7 @@ class CanvasView : View {
     fun addBitmap(bitmap: Bitmap) {
         Log.d(TAG, "addBitmap width:${bitmap.width} height:${bitmap.height}")
         list.add(bitmap)
+        requestLayout()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
