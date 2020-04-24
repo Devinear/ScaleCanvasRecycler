@@ -2,10 +2,7 @@ package com.example.customcanvas
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Rect
+import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
@@ -42,8 +39,9 @@ class CanvasView : View {
         var height = 0
         list.forEach {
             val src = Rect(0, 0, it.width, it.height)
-            val dst = Rect(0, height, it.width, height+it.height)
-//            Log.d(TAG, "onDraw Page:$index Src:$src Dst:$dst")
+            val left = getStartPosition(it.width)
+            val dst = Rect(left, height, left+it.width, height+it.height)
+            Log.d(TAG, "onDraw Page:$index Src:$src Dst:$dst")
             canvas.drawBitmap(it, src, dst, null)
             canvas.drawText("Page:$index", 10f, (dst.top + 50f), paint)
 
@@ -52,6 +50,9 @@ class CanvasView : View {
             height += it.height
         }
     }
+
+    // 음수가 나올 수 있음.
+    private fun getStartPosition(width: Int) : Int = (displaySize.x-width)/2
 
     fun addBitmap(bitmap: Bitmap) {
         Log.d(TAG, "addBitmap width:${bitmap.width} height:${bitmap.height}")
