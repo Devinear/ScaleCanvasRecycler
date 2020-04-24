@@ -1,4 +1,4 @@
-package com.example.scalecanvasrecycler
+package com.example.customcanvas
 
 import android.content.Context
 import android.widget.ScrollView

@@ -1,4 +1,4 @@
-package com.example.scalecanvasrecycler
+package com.example.customcanvas
 
 import android.content.Intent
 import android.os.Bundle
@@ -9,6 +9,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        startActivity(Intent(this, RecyclerActivity::class.java))
+        startActivity(Intent(this, CanvasScrollActivity::class.java))
     }
 }

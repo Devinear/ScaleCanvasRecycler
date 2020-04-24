@@ -1,4 +1,4 @@
-package com.example.scalecanvasrecycler
+package com.example.customcanvas
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
