@@ -1,15 +1,21 @@
 package com.example.customcanvas
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Bundle
+import android.util.AttributeSet
 import android.util.Log
+import android.view.GestureDetector
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
+import android.view.View
 import android.widget.Button
 import android.widget.ScrollView
 import androidx.appcompat.app.AppCompatActivity
 
-class CanvasScrollActivity : AppCompatActivity() {
+class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, View.OnTouchListener {
 
     lateinit var scrollView : ScrollView
     lateinit var canvasView : CanvasView
@@ -19,6 +25,10 @@ class CanvasScrollActivity : AppCompatActivity() {
     lateinit var btDown : Button
 
     private var tempBitmap: Bitmap? = null
+
+    private lateinit var gestureDetector : GestureDetector
+    private lateinit var scaleGestureDetector: ScaleGestureDetector
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate")
@@ -34,9 +44,13 @@ class CanvasScrollActivity : AppCompatActivity() {
         btDown = findViewById(R.id.btn_down)
         btDown.setOnClickListener { clickDownScroll() }
 
-//        val bitmap : Bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-//        val canvas = Canvas(bitmap)
-//        canvas.drawColor(Color.WHITE)
+        gestureDetector = GestureDetector(applicationContext, GestureListener())
+        scaleGestureDetector = ScaleGestureDetector(applicationContext, ScaleGestureListener(this))
+
+        for(i in 0..50) {
+            clickAddBitmap()
+        }
+        scrollView.setOnTouchListener(this)
     }
 
     private fun clickAddBitmap() {
@@ -62,6 +76,27 @@ class CanvasScrollActivity : AppCompatActivity() {
     private fun clickDownScroll() {
         Log.d(TAG, "clickDownScroll")
         scrollView.smoothScrollTo(0, canvasView.height)
+    }
+
+    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+        Log.d(TAG, "onTouch Action:${event?.action}")
+        val ret = scaleGestureDetector.onTouchEvent(event)
+        Log.d(TAG, "onTouch Return:$ret")
+        return ret
+    }
+
+    override fun onScaleChange(scaleFactor: Float, focusX: Float, focusY: Float): Boolean {
+        Log.d(TAG, "onScaleChange ScaleFactor:$scaleFactor FocusX:$focusX FocusY:$focusY")
+        return true
+    }
+
+    override fun onScaleStart(): Boolean {
+        Log.d(TAG, "onScaleStart")
+        return true
+    }
+
+    override fun onScaleEnd() {
+        Log.d(TAG, "onScaleEnd")
     }
 
     companion object {
