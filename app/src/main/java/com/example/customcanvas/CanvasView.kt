@@ -11,9 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 class CanvasView : View, OnScaleChangedListener {
 
     constructor(context: Context) : super(context)
-
     constructor(context: Context, attr: AttributeSet) : super(context, attr)
-
     constructor(context: Context, attr: AttributeSet, defStyleAttr: Int) : super(context, attr, defStyleAttr)
 
     private val list = mutableListOf<Bitmap>()
