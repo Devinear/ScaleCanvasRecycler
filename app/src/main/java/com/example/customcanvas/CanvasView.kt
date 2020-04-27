@@ -76,7 +76,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 //            val left = getStartPosition(bitmap.width)
             val dst = Rect(info.marginStart, sumHeight, info.marginStart + info.width, sumHeight + info.height)
             canvas.drawBitmap(bitmap, src, dst, null)
-            canvas.drawText("Page:$index", 10f, (dst.top + 50f), paint)
+            canvas.drawText("Page:$index / ${dst.top}", 10f, (dst.top + 50f), paint)
 
             index += 1
             sumHeight += info.posTop
@@ -100,8 +100,11 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         */
         canvasHeight = sumHeight
 
-        scaleWidth  = (canvasWidth*scaleFactor).toInt()
-        scaleHeight = (canvasHeight*scaleFactor).toInt()
+        if(scaleHeight != (canvasHeight*scaleFactor).toInt()) {
+            scaleWidth  = (canvasWidth*scaleFactor).toInt()
+            scaleHeight = (canvasHeight*scaleFactor).toInt()
+            requestLayout()
+        }
 
         canvas.restore()
         listener?.onViewSize(width = scaleWidth, height = scaleHeight, scale = scaleFactor)
@@ -133,11 +136,11 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
     fun clickUp() {
         Log.d(TAG, "clickUp")
         initScale()
-        requestLayout()
+        invalidate()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        Log.d(TAG, "onMeasure width:$widthMeasureSpec/$width/$canvasWidth height:$heightMeasureSpec/$height/$canvasHeight")
+        Log.d(TAG, "onMeasure width:$widthMeasureSpec/$width/$canvasWidth height:$heightMeasureSpec/$height/$canvasHeight/$scaleHeight")
         setMeasuredDimension(widthMeasureSpec, scaleHeight)
     }
 
@@ -168,8 +171,8 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
         scaleMatrix.set(matrix)
 
-//        invalidate()
-        requestLayout()
+        invalidate()
+//        requestLayout()
         return true
     }
 
@@ -181,21 +184,18 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
     override fun onScaleEnd() {
         Log.d(TAG, "onScaleEnd")
-        isScaling = false
-
         if(scaleFactor < 1) {
             initScale()
-            requestLayout()
-            return
+            invalidate() // Scale 조정하는 것이므로 화면 갱신 필요
         }
+        else {
+            val rectF = RectF()
+            scaleMatrix.mapRect(rectF)
 
-        val rectF = RectF()
-        scaleMatrix.mapRect(rectF)
-
-        if(rectF.top < 0) {
-            scaleMatrix.postTranslate(0f, abs(rectF.top))
-            requestLayout()
+            if(rectF.top < 0)
+                scaleMatrix.postTranslate(0f, abs(rectF.top))
         }
+        android.os.Handler().postDelayed({ isScaling = false }, DELAY_TIME)
     }
 
     override fun onDrag(dx: Float, dy: Float, focusX: Float, focusY: Float) {
@@ -311,5 +311,6 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
     companion object {
         const val TAG = "[DE][VI] Canvas"
+        const val DELAY_TIME = 200L
     }
 }
