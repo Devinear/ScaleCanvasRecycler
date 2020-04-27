@@ -77,7 +77,7 @@ class CanvasView : View, OnScaleChangedListener {
 
 //        setMeasuredDimension(width, viewHeight)
 
-        listener?.onViewSize(width = scaleWidth, height = scaleHeight)
+        listener?.onViewSize(width = scaleWidth, height = scaleHeight, scale = scaleFactor)
     }
 
     // 음수가 나올 수 있음.

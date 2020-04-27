@@ -25,6 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:text="FIRST"
+        android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -32,10 +33,19 @@
         android:id="@+id/tv_second"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
         android:text="SECOND"
+        android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/tv_first"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="@id/tv_first" />
+
+    <TextView
+        android:id="@+id/tv_third"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="THIRD"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/tv_second"
+        app:layout_constraintStart_toStartOf="@id/tv_first" />
 
 
     <Button

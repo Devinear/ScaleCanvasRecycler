@@ -25,6 +25,7 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
 
     lateinit var tvFirst : TextView
     lateinit var tvSecond: TextView
+    lateinit var tvThird : TextView
 
     private var tempBitmap: Bitmap? = null
 
@@ -50,6 +51,7 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
 
         tvFirst = findViewById(R.id.tv_first)
         tvSecond= findViewById(R.id.tv_second)
+        tvThird = findViewById(R.id.tv_third)
 
         gestureDetector = GestureDetector(applicationContext, GestureListener())
         scaleGestureDetector = ScaleGestureDetector(applicationContext, ScaleGestureListener(this))
@@ -108,10 +110,11 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         Log.d(TAG, "onScaleEnd")
     }
 
-    override fun onViewSize(width: Int, height: Int) {
-        Log.d(TAG, "onScaleEnd Width:$width Height:$height")
-        tvFirst.text = "Width:$width"
+    override fun onViewSize(width: Int, height: Int, scale: Float) {
+        Log.d(TAG, "onScaleEnd Width:$width Height:$height Scale:$scale")
+        tvFirst.text  = "Width :$width"
         tvSecond.text = "Height:$height"
+        tvThird.text  = "Scale :$scale"
     }
 
     companion object {

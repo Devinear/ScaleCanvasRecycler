@@ -1,5 +1,5 @@
 package com.example.customcanvas
 
 interface OnViewChangedListener {
-    fun onViewSize(width: Int, height: Int)
+    fun onViewSize(width: Int, height: Int, scale: Float)
 }
