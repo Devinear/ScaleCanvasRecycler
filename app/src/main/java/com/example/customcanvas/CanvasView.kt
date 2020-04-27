@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import kotlin.math.abs
 
 class CanvasView : View, OnScaleChangedListener {
 
@@ -48,15 +49,14 @@ class CanvasView : View, OnScaleChangedListener {
         paint.color = context.getColor(R.color.colorPrimaryDark)
         paint.textSize = 50f
 
-        var index = 1
-        var sumHeight = 0
-
-        val matrix = this.matrix
-        matrix.setScale(scaleFactor, scaleFactor, focusX, focusY)
+        val matrix : Matrix = this.matrix
+        matrix.set(scaleMatrix)
 
         canvas.save()
         canvas.setMatrix(matrix)
 
+        var index = 1
+        var sumHeight = 0
         list.forEach {
             val src = Rect(0, 0, it.width, it.height)
             val left = getStartPosition(it.width)
@@ -95,7 +95,7 @@ class CanvasView : View, OnScaleChangedListener {
     fun clickUp() {
         Log.d(TAG, "clickUp")
         initScale()
-        invalidate()
+        requestLayout()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -129,7 +129,7 @@ class CanvasView : View, OnScaleChangedListener {
         val matrix = this.matrix
         matrix.postScale(this.scaleFactor, this.scaleFactor, focusX, focusY)
 
-        scaleMatrix = matrix
+        scaleMatrix.set(matrix)
 
 //        invalidate()
         requestLayout()
@@ -147,7 +147,17 @@ class CanvasView : View, OnScaleChangedListener {
         isScaling = false
 
         if(scaleFactor < 1) {
-            scaleFactor = 1f
+            initScale()
+            requestLayout()
+            return
+        }
+
+        val rectF = RectF()
+        scaleMatrix.mapRect(rectF)
+
+        if(rectF.top < 0) {
+            scaleMatrix.postTranslate(0f, abs(rectF.top))
+            requestLayout()
         }
     }
 
