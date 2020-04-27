@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnViewChangedListener, View.OnTouchListener {
 
     lateinit var scrollView : ScrollView
-    lateinit var canvasView : CanvasView
+    lateinit var canvasView : CanvasView // CanvasView // CanvasImageView
 
     lateinit var btAdd : Button
     lateinit var btUp : Button
@@ -74,13 +74,13 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
 
 //      canvasView.invalidate()    // invalidate는 size가 변경되지 않는다.
         canvasView.requestLayout() // onMeasure를 호출하므로 size가 변경된다.
-
         scrollView.smoothScrollTo(0, canvasView.height)
     }
 
     private fun clickUpScroll() {
         Log.d(TAG, "clickUpScroll")
         scrollView.smoothScrollTo(0, 0)
+        canvasView.clickUp()
     }
 
     private fun clickDownScroll() {
@@ -103,11 +103,13 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
 
     override fun onScaleStart(): Boolean {
         Log.d(TAG, "onScaleStart")
+        canvasView.onScaleStart()
         return true
     }
 
     override fun onScaleEnd() {
         Log.d(TAG, "onScaleEnd")
+        canvasView.onScaleEnd()
     }
 
     override fun onViewSize(width: Int, height: Int, scale: Float) {

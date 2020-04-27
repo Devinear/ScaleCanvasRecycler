@@ -27,6 +27,10 @@ class CanvasView : View, OnScaleChangedListener {
     private var focusX = 0f
     private var focusY = 0f
 
+    private var scaleMatrix = Matrix()
+    val minScale = 0.8f
+    val maxScale = 2.0f
+
     var listener : OnViewChangedListener? = null
 
 
@@ -37,7 +41,7 @@ class CanvasView : View, OnScaleChangedListener {
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
 //        super.onDraw(canvas)
-        Log.d(TAG, "onDraw count:${list.size}")
+        Log.d(TAG, "onDraw count:${list.size} Scale:$isScaling")
         if(canvas == null) return
 
         val paint = Paint()
@@ -47,10 +51,11 @@ class CanvasView : View, OnScaleChangedListener {
         var index = 1
         var sumHeight = 0
 
+        val matrix = this.matrix
+        matrix.setScale(scaleFactor, scaleFactor, focusX, focusY)
+
         canvas.save()
-        if(isScaling) {
-            canvas.scale(scaleFactor, scaleFactor, focusX, focusY)
-        }
+        canvas.setMatrix(matrix)
 
         list.forEach {
             val src = Rect(0, 0, it.width, it.height)
@@ -67,16 +72,9 @@ class CanvasView : View, OnScaleChangedListener {
         canvasHeight = sumHeight
 //        canvasWidth = canvas.width
 //        canvasHeight = canvas.height
-
-        if(isScaling) {
-//            scaleWidth = (canvasWidth*scaleFactor).toInt()
-            scaleHeight = (canvasHeight*scaleFactor).toInt()
-        }
+        scaleHeight = (canvasHeight*scaleFactor).toInt()
 
         canvas.restore()
-
-//        setMeasuredDimension(width, viewHeight)
-
         listener?.onViewSize(width = scaleWidth, height = scaleHeight, scale = scaleFactor)
     }
 
@@ -94,49 +92,63 @@ class CanvasView : View, OnScaleChangedListener {
         scaleHeight = canvasHeight
     }
 
+    fun clickUp() {
+        Log.d(TAG, "clickUp")
+        initScale()
+        invalidate()
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         Log.d(TAG, "onMeasure width:$widthMeasureSpec/$width/$canvasWidth height:$heightMeasureSpec/$height/$canvasHeight")
 //        setMeasuredDimension(widthMeasureSpec, canvasHeight)
         setMeasuredDimension(scaleWidth, scaleHeight)
     }
 
+    private fun initScale() {
+        Log.d(TAG, "initScale")
+        scaleFactor = 1f
+        scaleMatrix = Matrix()
+    }
+
     override fun onScaleChange(scaleFactor: Float, focusX: Float, focusY: Float): Boolean {
         Log.d(TAG, "onScaleChange ScaleFactor:$scaleFactor/${this.scaleFactor} FocusX:$focusX FocusY:$focusY")
-        if((this.scaleFactor == 0.8f && scaleFactor < 1) || (this.scaleFactor == 2f && scaleFactor > 1))
+        if((this.scaleFactor == minScale && scaleFactor < 1) || (this.scaleFactor == maxScale && scaleFactor > 1))
             return false
 
-//        scaleX = scaleFactor
-//        scaleY = scaleFactor
         isScaling = true
 
-//        val matrix = Matrix()
-//        matrix.postScale(scaleFactor, scaleFactor, focusX, focusX)
-
         this.scaleFactor *= scaleFactor
-        if(this.scaleFactor < 0.8f)
-            this.scaleFactor = 0.8f
-        else if(this.scaleFactor > 2f)
-            this.scaleFactor = 2f
+        if(this.scaleFactor < minScale)
+            this.scaleFactor = minScale
+        else if(this.scaleFactor > maxScale)
+            this.scaleFactor = maxScale
 
         this.focusX = focusX
         this.focusY = focusY
 
-//        invalidate()
-        requestLayout()
+        val matrix = this.matrix
+        matrix.postScale(this.scaleFactor, this.scaleFactor, focusX, focusY)
+
+        scaleMatrix = matrix
+
+        invalidate()
+//        requestLayout()
         return true
     }
 
     override fun onScaleStart(): Boolean {
         Log.d(TAG, "onScaleStart")
         isScaling = true
-        scaleFactor = 1f
         return true
     }
 
     override fun onScaleEnd() {
         Log.d(TAG, "onScaleEnd")
         isScaling = false
-        scaleFactor = 1f
+
+        if(scaleFactor < 1) {
+            scaleFactor = 1f
+        }
     }
 
     companion object {
