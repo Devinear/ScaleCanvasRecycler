@@ -131,8 +131,8 @@ class CanvasView : View, OnScaleChangedListener {
 
         scaleMatrix = matrix
 
-        invalidate()
-//        requestLayout()
+//        invalidate()
+        requestLayout()
         return true
     }
 
