@@ -5,14 +5,12 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import android.view.GestureDetector
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
-import android.view.View
+import android.view.*
 import android.widget.Button
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import kotlin.math.sqrt
 
 class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnViewChangedListener, View.OnTouchListener {
 
@@ -60,6 +58,7 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
             clickAddBitmap()
         }
         scrollView.setOnTouchListener(this)
+        touchSlop = ViewConfiguration.get(applicationContext).scaledTouchSlop.toFloat()
     }
 
     private fun clickAddBitmap() {
@@ -88,9 +87,50 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         scrollView.smoothScrollTo(0, canvasView.height)
     }
 
+    private var isDragging = false
+    private var lastTouchX = 0f
+    private var lastTouchY = 0f
+    private var touchSlop = 0f
+
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+        if(event == null) return false
         Log.d(TAG, "onTouch Action:${event?.action}")
         val ret = scaleGestureDetector.onTouchEvent(event)
+
+        when(event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                lastTouchX = event.x
+                lastTouchY = event.y
+                isDragging = false
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val x = event.x
+                val y = event.y
+                val dx = x - lastTouchX
+                val dy = y - lastTouchY
+
+                if(!isDragging && !canvasView.scaling) {
+                    isDragging = sqrt((dx*dx)+(dy*dy)) >= touchSlop
+                    if(isDragging)
+                        canvasView.onDragStart()
+                }
+                if(isDragging) {
+                    canvasView.onDrag(dx, dy, x, y)
+                    lastTouchX = x
+                    lastTouchY = y
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                if(isDragging)
+                    canvasView.onDragEnd()
+                isDragging = false
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                if(isDragging)
+                    canvasView.onDragEnd()
+                isDragging = false
+            }
+        }
         Log.d(TAG, "onTouch Return:$ret")
         return false
     }

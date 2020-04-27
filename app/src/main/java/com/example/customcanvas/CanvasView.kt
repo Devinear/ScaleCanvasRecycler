@@ -9,7 +9,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import kotlin.math.abs
 
-class CanvasView : View, OnScaleChangedListener {
+class CanvasView : View, OnScaleChangedListener, OnDragChangedListener {
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attr: AttributeSet) : super(context, attr)
@@ -23,6 +23,12 @@ class CanvasView : View, OnScaleChangedListener {
     private val displaySize = Point()
 
     private var isScaling = false
+    val scaling : Boolean
+        get() = isScaling
+
+    private var isDragging = false
+    val dragging : Boolean
+        get() = isDragging
 
     private var scaleFactor = 1f
     private var focusX = 0f
@@ -159,6 +165,20 @@ class CanvasView : View, OnScaleChangedListener {
             scaleMatrix.postTranslate(0f, abs(rectF.top))
             requestLayout()
         }
+    }
+
+    override fun onDrag(dx: Float, dy: Float, focusX: Float, focusY: Float) {
+        Log.d(TAG, "onDrag dx:$dx dy:$dy focusX:$focusX focusY:$focusY")
+        scaleMatrix.postTranslate(dx, 0f)
+        invalidate()
+    }
+
+    override fun onDragStart() {
+        Log.d(TAG, "onDragStart")
+    }
+
+    override fun onDragEnd() {
+        Log.d(TAG, "onDragEnd")
     }
 
     companion object {
