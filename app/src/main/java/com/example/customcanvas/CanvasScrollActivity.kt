@@ -14,7 +14,7 @@ import kotlin.math.sqrt
 
 class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnViewChangedListener, View.OnTouchListener {
 
-    lateinit var scrollView : ScrollView
+    lateinit var scrollView : CanvasScrollView
     lateinit var canvasView : CanvasView // CanvasView // CanvasImageView
 
     lateinit var btAdd : Button
@@ -24,6 +24,8 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
     lateinit var tvFirst : TextView
     lateinit var tvSecond: TextView
     lateinit var tvThird : TextView
+    lateinit var tvForth : TextView
+    lateinit var tvFifth : TextView
 
     private var tempBitmap: Bitmap? = null
 
@@ -40,6 +42,8 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         canvasView = findViewById(R.id.canvasView)
         canvasView.listener = this
 
+        scrollView.setOnScrollChangeListener(canvasView)
+
         btAdd = findViewById(R.id.btn_add)
         btAdd.setOnClickListener { clickAddBitmap() }
         btUp = findViewById(R.id.btn_up)
@@ -50,6 +54,8 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         tvFirst = findViewById(R.id.tv_first)
         tvSecond= findViewById(R.id.tv_second)
         tvThird = findViewById(R.id.tv_third)
+        tvForth = findViewById(R.id.tv_forth)
+        tvFifth = findViewById(R.id.tv_fifth)
 
         gestureDetector = GestureDetector(applicationContext, GestureListener())
         scaleGestureDetector = ScaleGestureDetector(applicationContext, ScaleGestureListener(this))
@@ -69,7 +75,8 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
             val canvas = Canvas(tempBitmap!!)
             canvas.drawColor(Color.RED)
         }
-        canvasView.addBitmap(tempBitmap!!)
+        val info = BitmapInfo(4, 5, 4, 1071, 1547)
+        canvasView.addBitmap(tempBitmap!!, info)
 
 //      canvasView.invalidate()    // invalidate는 size가 변경되지 않는다.
         canvasView.requestLayout() // onMeasure를 호출하므로 size가 변경된다.
@@ -111,13 +118,19 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
 
                 if(!isDragging && !canvasView.scaling) {
                     isDragging = sqrt((dx*dx)+(dy*dy)) >= touchSlop
-                    if(isDragging)
-                        canvasView.onDragStart()
+                    if(isDragging) {
+                        canvasView.onDragStart(x, y)
+                    }
                 }
-                if(isDragging) {
-                    canvasView.onDrag(dx, dy, x, y)
-                    lastTouchX = x
-                    lastTouchY = y
+                if((dx > 0 && canvasView.canDragStart) || (dx < 0 && canvasView.canDragEnd)) {
+                    if(isDragging) {
+                        canvasView.onDrag(dx, dy, x, y)
+                        lastTouchX = x
+                        lastTouchY = y
+                    }
+                }
+                else {
+                    isDragging = false
                 }
             }
             MotionEvent.ACTION_UP -> {
@@ -157,6 +170,11 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         tvFirst.text  = "Width :$width"
         tvSecond.text = "Height:$height"
         tvThird.text  = "Scale :$scale"
+    }
+
+    override fun onFindItem(first: Int, last: Int) {
+        Log.d(TAG, "onFindItem first:$first last:$last")
+        tvForth.text = "First:$first Last:$last"
     }
 
     companion object {

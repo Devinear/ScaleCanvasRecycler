@@ -9,13 +9,15 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import kotlin.math.abs
 
-class CanvasView : View, OnScaleChangedListener, OnDragChangedListener {
+class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnScrollChangeListener {
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attr: AttributeSet) : super(context, attr)
     constructor(context: Context, attr: AttributeSet, defStyleAttr: Int) : super(context, attr, defStyleAttr)
 
-    private val list = mutableListOf<Bitmap>()
+    private val listBitmap = mutableListOf<Bitmap>()
+    private val listInfo = mutableListOf<BitmapInfo>()
+
     private var canvasWidth  : Int = 0
     private var canvasHeight : Int = 0
     private var scaleWidth  : Int = 0
@@ -23,12 +25,15 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener {
     private val displaySize = Point()
 
     private var isScaling = false
-    val scaling : Boolean
-        get() = isScaling
+    val scaling : Boolean;  get() = isScaling
 
     private var isDragging = false
-    val dragging : Boolean
-        get() = isDragging
+    val dragging : Boolean; get() = isDragging
+
+    private var canDraggingStart = true
+    private var canDraggingEnd = true
+    val canDragStart : Boolean; get() = canDraggingStart
+    val canDragEnd   : Boolean; get() = canDraggingEnd
 
     private var scaleFactor = 1f
     private var focusX = 0f
@@ -48,7 +53,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener {
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
 //        super.onDraw(canvas)
-        Log.d(TAG, "onDraw count:${list.size} Scale:$isScaling")
+        Log.d(TAG, "onDraw count:${listBitmap.size} Scale:$isScaling")
         if(canvas == null) return
 
         val paint = Paint()
@@ -63,9 +68,26 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener {
 
         var index = 1
         var sumHeight = 0
-        list.forEach {
+        listBitmap.indices.forEach {
+            val bitmap = listBitmap[it]
+            val info = listInfo[it]
+
+            val src = Rect(0, 0, bitmap.width, bitmap.height)
+//            val left = getStartPosition(bitmap.width)
+            val dst = Rect(info.marginStart, sumHeight, info.marginStart + info.width, sumHeight + info.height)
+            canvas.drawBitmap(bitmap, src, dst, null)
+            canvas.drawText("Page:$index", 10f, (dst.top + 50f), paint)
+
+            index += 1
+            sumHeight += info.posTop
+            sumHeight += info.height
+
+        }
+        /*
+        listBitmap.forEach {
             val src = Rect(0, 0, it.width, it.height)
             val left = getStartPosition(it.width)
+//            val dst = Rect(left, sumHeight, left + it.width, sumHeight + it.height)
             val dst = Rect(left, sumHeight, left + it.width, sumHeight + it.height)
 //            Log.d(TAG, "onDraw Page:$index Src:$src Dst:$dst")
             canvas.drawBitmap(it, src, dst, null)
@@ -75,9 +97,10 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener {
             sumHeight += 10
             sumHeight += it.height
         }
+        */
         canvasHeight = sumHeight
-//        canvasWidth = canvas.width
-//        canvasHeight = canvas.height
+
+        scaleWidth  = (canvasWidth*scaleFactor).toInt()
         scaleHeight = (canvasHeight*scaleFactor).toInt()
 
         canvas.restore()
@@ -87,15 +110,24 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener {
     // 음수가 나올 수 있음.
     private fun getStartPosition(width: Int) : Int = (displaySize.x-width)/2
 
-    fun addBitmap(bitmap: Bitmap) {
+    fun addBitmap(bitmap: Bitmap, info: BitmapInfo) {
         Log.d(TAG, "addBitmap width:${bitmap.width} height:${bitmap.height}")
-        list.add(bitmap)
-        canvasWidth = displaySize.x
-        canvasHeight += 10
-        canvasHeight += bitmap.height
+        listBitmap.add(bitmap)
+        listInfo.add(info)
 
-        scaleWidth = canvasWidth
+//        canvasWidth = displaySize.x
+        canvasHeight += info.posTop
+        canvasHeight += info.height
+
+//        scaleWidth = canvasWidth
         scaleHeight = canvasHeight
+    }
+
+    fun updateBitmapInfo(index:Int, info: BitmapInfo) : Boolean {
+        Log.d(TAG, "updateBitmapInfo index:$index info:$info")
+        if(listInfo.size <= index) return false
+        listInfo[index] = info
+        return true
     }
 
     fun clickUp() {
@@ -106,8 +138,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener {
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         Log.d(TAG, "onMeasure width:$widthMeasureSpec/$width/$canvasWidth height:$heightMeasureSpec/$height/$canvasHeight")
-//        setMeasuredDimension(widthMeasureSpec, canvasHeight)
-        setMeasuredDimension(scaleWidth, scaleHeight)
+        setMeasuredDimension(widthMeasureSpec, scaleHeight)
     }
 
     private fun initScale() {
@@ -169,16 +200,113 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener {
 
     override fun onDrag(dx: Float, dy: Float, focusX: Float, focusY: Float) {
         Log.d(TAG, "onDrag dx:$dx dy:$dy focusX:$focusX focusY:$focusY")
-        scaleMatrix.postTranslate(dx, 0f)
+        val marginStart = computeCanDraggingStart(focusY = focusY)
+        if(dx > 0 && !canDraggingStart)
+            return
+        val marginEnd = computeCanDraggingEnd(focusY = focusY)
+        if(dx < 0 && !canDraggingEnd)
+            return
+
+        var newDx = dx
+        if(newDx > 0 && newDx > abs(marginStart)) {
+            newDx = abs(marginStart).toFloat()
+        }
+        else if(newDx < 0 && abs(newDx) > marginEnd) {
+            newDx = -(marginEnd.toFloat())
+        }
+
+        scaleMatrix.postTranslate(newDx, 0f)
         invalidate()
     }
 
-    override fun onDragStart() {
-        Log.d(TAG, "onDragStart")
+    override fun onDragStart(focusX: Float, focusY: Float) {
+        Log.d(TAG, "onDragStart focusX:$focusX focusY:$focusY")
+
+        computeCanDraggingStart(focusY = focusY)
+        computeCanDraggingEnd(focusY = focusY)
+    }
+
+    private fun computeCanDraggingStart(focusY: Float) : Float {
+        val rectF = RectF()
+        scaleMatrix.mapRect(rectF)
+        canDraggingStart = rectF.left < 0
+        return rectF.left
+    }
+
+    private fun computeCanDraggingEnd(focusY: Float) : Float {
+        val rectF = RectF()
+        scaleMatrix.mapRect(rectF)
+
+        val position = findTouchItemPosition(focusY.toInt())
+        val info = listInfo[position]
+
+        var posEnd = (info.marginStart+info.width+info.marginEnd)*scaleFactor
+        posEnd += rectF.left
+
+        canDraggingEnd = (posEnd > displaySize.x)
+        return posEnd-displaySize.x
     }
 
     override fun onDragEnd() {
         Log.d(TAG, "onDragEnd")
+    }
+
+    private var curScrollTop: Int = 0
+
+    override fun onScrollChange(v: View?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
+        Log.d(TAG, "onScrollChange ScrollX:[$oldScrollX] > [$scrollX] ScrollY:[$oldScrollY] > [$scrollY]")
+        curScrollTop = scrollY
+
+        val first = findFirstVisibleItemPosition()
+        val last  = findLastVisibleItemPosition()
+        listener?.onFindItem(first, last)
+    }
+
+    private fun findTouchItemPosition(focusY: Int): Int {
+        val rect = Rect()
+        getGlobalVisibleRect(rect)
+
+        val top = curScrollTop
+        var touchY = top + (focusY - rect.top)
+
+        listInfo.indices.forEach {
+            val info = listInfo[it]
+            touchY -= (info.posTop + info.height)
+            if(touchY <= 0)
+                return it
+        }
+        return listInfo.lastIndex
+    }
+
+    private fun findFirstVisibleItemPosition(): Int {
+        val rect = Rect()
+        getGlobalVisibleRect(rect)
+
+        var top = curScrollTop
+
+        listInfo.indices.forEach {
+            val info = listInfo[it]
+            top -= (info.posTop + info.height)
+            if(top <= 0)
+                return it
+        }
+        return listInfo.lastIndex
+    }
+
+    private fun findLastVisibleItemPosition(): Int {
+        val rect = Rect()
+        getGlobalVisibleRect(rect)
+
+        val top = curScrollTop
+        var bottom = top+rect.height()
+
+        listInfo.indices.forEach {
+            val info = listInfo[it]
+            bottom -= (info.posTop + info.height)
+            if(bottom <= 0)
+                return it
+        }
+        return listInfo.lastIndex
     }
 
     companion object {
