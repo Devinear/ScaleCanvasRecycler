@@ -151,8 +151,8 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         scaleMatrix = Matrix()
     }
 
-    private var initFocusX = 0f
-    private var initFocusY = 0f
+    private var initFocusX = -1f
+    private var initFocusY = -1f
 
     override fun onScaleChange(scaleFactor: Float, focusX: Float, focusY: Float): Boolean {
         Log.d(TAG, "onScaleChange ScaleFactor:$scaleFactor/${this.scaleFactor} FocusX:$focusX FocusY:$focusY")
@@ -242,6 +242,8 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         }
         this.ratioX = -1f
         this.ratioY = -1f
+        this.initFocusX = -1f
+        this.initFocusY = -1f
         android.os.Handler().postDelayed({ isScaling = false }, DELAY_TIME)
     }
 
