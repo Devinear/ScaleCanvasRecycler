@@ -36,8 +36,8 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
     val canDragEnd   : Boolean; get() = canDraggingEnd
 
     private var scaleFactor = 1f
-    private var focusX = 0f
-    private var focusY = 0f
+    private var ratioX = 0f
+    private var ratioY = 0f
 
     private var scaleMatrix = Matrix()
     val minScale = 0.8f
@@ -101,7 +101,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         canvasHeight = sumHeight
 
         if(scaleHeight != (canvasHeight*scaleFactor).toInt()) {
-            scaleWidth  = (canvasWidth*scaleFactor).toInt()
+            scaleWidth  = (displaySize.x*scaleFactor).toInt()
             scaleHeight = (canvasHeight*scaleFactor).toInt()
             requestLayout()
         }
@@ -118,12 +118,13 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         listBitmap.add(bitmap)
         listInfo.add(info)
 
-//        canvasWidth = displaySize.x
         canvasHeight += info.posTop
         canvasHeight += info.height
-
-//        scaleWidth = canvasWidth
         scaleHeight = canvasHeight
+
+        // 초기...?
+        canvasWidth = displaySize.x
+        scaleWidth = canvasWidth
     }
 
     fun updateBitmapInfo(index:Int, info: BitmapInfo) : Boolean {
@@ -150,12 +151,40 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         scaleMatrix = Matrix()
     }
 
+    private var initFocusX = 0f
+    private var initFocusY = 0f
+
     override fun onScaleChange(scaleFactor: Float, focusX: Float, focusY: Float): Boolean {
         Log.d(TAG, "onScaleChange ScaleFactor:$scaleFactor/${this.scaleFactor} FocusX:$focusX FocusY:$focusY")
         if((this.scaleFactor == minScale && scaleFactor < 1) || (this.scaleFactor == maxScale && scaleFactor > 1))
             return false
 
-        isScaling = true
+        val rectGlobal = Rect()
+        getGlobalVisibleRect(rectGlobal)
+
+        val rectDrawing = Rect()
+        getDrawingRect(rectDrawing)
+
+        val rectFocused = Rect()
+        getFocusedRect(rectFocused)
+
+        val rectHit = Rect()
+        getHitRect(rectHit)
+
+        val rectLocal = Rect()
+        getLocalVisibleRect(rectLocal)
+
+        val rectMap = RectF()
+        scaleMatrix.mapRect(rectMap)
+
+        if(!isScaling) {
+            isScaling = true
+            initFocusX = focusX
+            initFocusY = focusY
+
+            ratioX = (focusX + rectMap.left - rectGlobal.left) / scaleWidth
+            ratioY = (focusY + curScrollTop - rectGlobal.top) / scaleHeight
+        }
 
         this.scaleFactor *= scaleFactor
         if(this.scaleFactor < minScale)
@@ -163,22 +192,38 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         else if(this.scaleFactor > maxScale)
             this.scaleFactor = maxScale
 
-        this.focusX = focusX
-        this.focusY = focusY
+        val baseMatrix = Matrix()
 
-        val matrix = this.matrix
-        matrix.postScale(this.scaleFactor, this.scaleFactor, focusX, focusY)
 
-        scaleMatrix.set(matrix)
+        val newX = ratioX * scaleWidth + rectGlobal.left - rectMap.left
+        val newY = ratioY * scaleHeight + rectGlobal.top - curScrollTop
+        Log.d(TAG, "onScaleChange FocusX:${focusX.toInt()} newX:${newX.toInt()} FocusY:${focusY.toInt()} newY:${newY.toInt()}")
+
+//        val matrix = this.matrix
+//        matrix.postScale(this.scaleFactor, this.scaleFactor, focusX, focusY)
+//        scaleMatrix.set(matrix)
+
+//        scaleMatrix.postScale(scaleFactor, scaleFactor, focusX, focusY)
+        scaleMatrix.postScale(scaleFactor, scaleFactor, initFocusX, initFocusY)
 
         invalidate()
 //        requestLayout()
         return true
     }
 
+    private fun getFocusByRatioX(focusX: Float) : Float {
+        var ratioX = 0f
+
+        scaleWidth
+
+        return ratioX
+    }
+
     override fun onScaleStart(): Boolean {
         Log.d(TAG, "onScaleStart")
-        isScaling = true
+//        isScaling = true
+//        this.focusX = -1f
+//        this.focusY = -1f
         return true
     }
 
@@ -195,6 +240,8 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
             if(rectF.top < 0)
                 scaleMatrix.postTranslate(0f, abs(rectF.top))
         }
+        this.ratioX = -1f
+        this.ratioY = -1f
         android.os.Handler().postDelayed({ isScaling = false }, DELAY_TIME)
     }
 

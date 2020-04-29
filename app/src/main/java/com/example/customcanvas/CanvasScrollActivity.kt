@@ -60,7 +60,7 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         gestureDetector = GestureDetector(applicationContext, GestureListener())
         scaleGestureDetector = ScaleGestureDetector(applicationContext, ScaleGestureListener(this))
 
-        for(i in 0..10) {
+        for(i in 0..1) {
             clickAddBitmap()
         }
         scrollView.setOnTouchListener(this)
