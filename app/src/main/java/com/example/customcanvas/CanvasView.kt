@@ -36,10 +36,8 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
     val canDragEnd   : Boolean; get() = canDraggingEnd
 
     private var scaleFactor = 1f
-    private var ratioX = 0f
-    private var ratioY = 0f
-
     private var scaleMatrix = Matrix()
+
     val minScale = 0.8f
     val maxScale = 2.0f
 
@@ -53,7 +51,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
 //        super.onDraw(canvas)
-        Log.d(TAG, "onDraw count:${listBitmap.size} Scale:$isScaling")
+        Log.d(TAG, "onDraw count:${listBitmap.size} Scale:$isScaling Matrix:$scaleMatrix")
         if(canvas == null) return
 
         val paint = Paint()
@@ -68,13 +66,18 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
         var index = 1
         var sumHeight = 0
+
         listBitmap.indices.forEach {
             val bitmap = listBitmap[it]
             val info = listInfo[it]
 
             val src = Rect(0, 0, bitmap.width, bitmap.height)
-//            val left = getStartPosition(bitmap.width)
-            val dst = Rect(info.marginStart, sumHeight, info.marginStart + info.width, sumHeight + info.height)
+            val dst = Rect(
+                info.marginStart,
+                sumHeight,
+                info.marginStart + info.width,
+                sumHeight + info.height
+            )
             canvas.drawBitmap(bitmap, src, dst, null)
             canvas.drawText("Page:$index / ${dst.top}", 10f, (dst.top + 50f), paint)
 
@@ -83,21 +86,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
             sumHeight += info.height
 
         }
-        /*
-        listBitmap.forEach {
-            val src = Rect(0, 0, it.width, it.height)
-            val left = getStartPosition(it.width)
-//            val dst = Rect(left, sumHeight, left + it.width, sumHeight + it.height)
-            val dst = Rect(left, sumHeight, left + it.width, sumHeight + it.height)
-//            Log.d(TAG, "onDraw Page:$index Src:$src Dst:$dst")
-            canvas.drawBitmap(it, src, dst, null)
-            canvas.drawText("Page:$index", 10f, (dst.top + 50f), paint)
 
-            index += 1
-            sumHeight += 10
-            sumHeight += it.height
-        }
-        */
         canvasHeight = sumHeight
 
         if(scaleHeight != (canvasHeight*scaleFactor).toInt()) {
@@ -151,25 +140,10 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         scaleMatrix = Matrix()
     }
 
-    private var initFocusX = -1f
-    private var initFocusY = -1f
-
     override fun onScaleChange(scaleFactor: Float, focusX: Float, focusY: Float): Boolean {
         Log.d(TAG, "onScaleChange ScaleFactor:$scaleFactor/${this.scaleFactor} FocusX:$focusX FocusY:$focusY")
         if((this.scaleFactor == minScale && scaleFactor < 1) || (this.scaleFactor == maxScale && scaleFactor > 1))
             return false
-
-        val rectGlobal = Rect()
-        getGlobalVisibleRect(rectGlobal)
-
-        val rectDrawing = Rect()
-        getDrawingRect(rectDrawing)
-
-        val rectFocused = Rect()
-        getFocusedRect(rectFocused)
-
-        val rectHit = Rect()
-        getHitRect(rectHit)
 
         val rectLocal = Rect()
         getLocalVisibleRect(rectLocal)
@@ -179,11 +153,6 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
         if(!isScaling) {
             isScaling = true
-            initFocusX = focusX
-            initFocusY = focusY
-
-            ratioX = (focusX + rectMap.left - rectGlobal.left) / scaleWidth
-            ratioY = (focusY + curScrollTop - rectGlobal.top) / scaleHeight
         }
 
         this.scaleFactor *= scaleFactor
@@ -192,6 +161,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         else if(this.scaleFactor > maxScale)
             this.scaleFactor = maxScale
 
+        // 확대된 Canvas를 고려하여 Pivot Point 설정
         val x = focusX + abs(rectMap.left)
         val y = focusY + rectLocal.top
 
@@ -199,43 +169,30 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         listener?.onPivotPoint(x, y)
 
         invalidate()
-//        requestLayout()
         return true
-    }
-
-    private fun getFocusByRatioX(focusX: Float) : Float {
-        var ratioX = 0f
-
-        scaleWidth
-
-        return ratioX
     }
 
     override fun onScaleStart(): Boolean {
         Log.d(TAG, "onScaleStart")
-//        isScaling = true
-//        this.focusX = -1f
-//        this.focusY = -1f
         return true
     }
 
     override fun onScaleEnd() {
-        Log.d(TAG, "onScaleEnd")
         if(scaleFactor < 1) {
+            Log.d(TAG, "onScaleEnd Scale:$scaleFactor")
             initScale()
             invalidate() // Scale 조정하는 것이므로 화면 갱신 필요
         }
         else {
             val rectF = RectF()
             scaleMatrix.mapRect(rectF)
+            Log.d(TAG, "onScaleEnd Scale:$scaleFactor MapRect:$rectF")
 
-            if(rectF.top < 0)
+            if(rectF.top < 0) {
                 scaleMatrix.postTranslate(0f, abs(rectF.top))
+                (context as CanvasScrollActivity).scrollView.scrollBy(0, abs(rectF.top).toInt())
+            }
         }
-        this.ratioX = -1f
-        this.ratioY = -1f
-        this.initFocusX = -1f
-        this.initFocusY = -1f
         android.os.Handler().postDelayed({ isScaling = false }, DELAY_TIME)
     }
 
@@ -292,12 +249,8 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         Log.d(TAG, "onDragEnd")
     }
 
-    private var curScrollTop: Int = 0
-
     override fun onScrollChange(v: View?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
-        Log.d(TAG, "onScrollChange ScrollX:[$oldScrollX] > [$scrollX] ScrollY:[$oldScrollY] > [$scrollY]")
-        curScrollTop = scrollY
-
+//        Log.d(TAG, "onScrollChange ScrollX:[$oldScrollX] > [$scrollX] ScrollY:[$oldScrollY] > [$scrollY]")
         val first = findFirstVisibleItemPosition()
         val last  = findLastVisibleItemPosition()
         listener?.onFindItem(first, last)
@@ -305,10 +258,8 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
     private fun findTouchItemPosition(focusY: Int): Int {
         val rect = Rect()
-        getGlobalVisibleRect(rect)
-
-        val top = curScrollTop
-        var touchY = top + (focusY - rect.top)
+        getLocalVisibleRect(rect)
+        var touchY = rect.top + focusY
 
         listInfo.indices.forEach {
             val info = listInfo[it]
@@ -321,9 +272,8 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
     private fun findFirstVisibleItemPosition(): Int {
         val rect = Rect()
-        getGlobalVisibleRect(rect)
-
-        var top = curScrollTop
+        getLocalVisibleRect(rect)
+        var top = rect.top
 
         listInfo.indices.forEach {
             val info = listInfo[it]
@@ -336,10 +286,8 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
     private fun findLastVisibleItemPosition(): Int {
         val rect = Rect()
-        getGlobalVisibleRect(rect)
-
-        val top = curScrollTop
-        var bottom = top+rect.height()
+        getLocalVisibleRect(rect)
+        var bottom = rect.bottom
 
         listInfo.indices.forEach {
             val info = listInfo[it]
