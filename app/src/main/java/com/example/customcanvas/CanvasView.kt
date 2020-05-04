@@ -192,19 +192,11 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         else if(this.scaleFactor > maxScale)
             this.scaleFactor = maxScale
 
-        val baseMatrix = Matrix()
+        val x = focusX + abs(rectMap.left)
+        val y = focusY + rectLocal.top
 
-
-        val newX = ratioX * scaleWidth + rectGlobal.left - rectMap.left
-        val newY = ratioY * scaleHeight + rectGlobal.top - curScrollTop
-        Log.d(TAG, "onScaleChange FocusX:${focusX.toInt()} newX:${newX.toInt()} FocusY:${focusY.toInt()} newY:${newY.toInt()}")
-
-//        val matrix = this.matrix
-//        matrix.postScale(this.scaleFactor, this.scaleFactor, focusX, focusY)
-//        scaleMatrix.set(matrix)
-
-//        scaleMatrix.postScale(scaleFactor, scaleFactor, focusX, focusY)
-        scaleMatrix.postScale(scaleFactor, scaleFactor, initFocusX, initFocusY)
+        scaleMatrix.postScale(scaleFactor, scaleFactor, x, y)
+        listener?.onPivotPoint(x, y)
 
         invalidate()
 //        requestLayout()

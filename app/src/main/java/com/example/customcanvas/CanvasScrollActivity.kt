@@ -177,6 +177,11 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         tvForth.text = "First:$first Last:$last"
     }
 
+    override fun onPivotPoint(pivotX: Float, pivotY: Float) {
+        Log.d(TAG, "onPivotPoint PivotX:$pivotX PivotY:$pivotY")
+        tvFifth.text = "PivotX:$pivotX PivotY:$pivotY"
+    }
+
     companion object {
         const val TAG = "[DE][AC] Activity"
     }
