@@ -145,27 +145,34 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         if((this.scaleFactor == minScale && scaleFactor < 1) || (this.scaleFactor == maxScale && scaleFactor > 1))
             return false
 
+        var scale = scaleFactor
+
         val rectLocal = Rect()
         getLocalVisibleRect(rectLocal)
 
-        val rectMap = RectF()
-        scaleMatrix.mapRect(rectMap)
+        val rectMapBefore = RectF()
+        scaleMatrix.mapRect(rectMapBefore)
 
         if(!isScaling) {
             isScaling = true
         }
 
-        this.scaleFactor *= scaleFactor
-        if(this.scaleFactor < minScale)
+        this.scaleFactor *= scale
+        if(this.scaleFactor < minScale) {
             this.scaleFactor = minScale
-        else if(this.scaleFactor > maxScale)
+            scale = minScale / this.scaleFactor
+        }
+        else if(this.scaleFactor > maxScale) {
             this.scaleFactor = maxScale
+            scale = maxScale / this.scaleFactor
+        }
+        Log.d(TAG, "onScaleChange $scaleFactor >> $scale MATRIX:$scaleMatrix")
 
         // 확대된 Canvas를 고려하여 Pivot Point 설정
-        val x = focusX + abs(rectMap.left)
+        val x = focusX + abs(rectMapBefore.left)
         val y = focusY + rectLocal.top
 
-        scaleMatrix.postScale(scaleFactor, scaleFactor, x, y)
+        scaleMatrix.postScale(scale, scale, x, y)
         listener?.onPivotPoint(x, y)
 
         invalidate()
@@ -186,12 +193,20 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         else {
             val rectF = RectF()
             scaleMatrix.mapRect(rectF)
-            Log.d(TAG, "onScaleEnd Scale:$scaleFactor MapRect:$rectF")
 
+            val moveTop = abs(rectF.top)
             if(rectF.top < 0) {
-                scaleMatrix.postTranslate(0f, abs(rectF.top))
-                (context as CanvasScrollActivity).scrollView.scrollBy(0, abs(rectF.top).toInt())
+                scaleMatrix.postTranslate(0f, moveTop)
+                (context as CanvasScrollActivity).scrollView.scrollBy(0, moveTop.toInt())
             }
+
+            val moveLeft = if(rectF.left<0) (scaleWidth-abs(rectF.left)) else 0f
+            val moveRight = if(rectF.left + scaleWidth < displaySize.x) (displaySize.x - (rectF.left + scaleWidth)) else 0f
+            if(moveRight > 0) {
+                scaleMatrix.postTranslate(moveRight, 0f)
+            }
+
+            Log.d(TAG, "onScaleEnd Scale:$scaleFactor moveTop:$moveTop moveLeft:$moveLeft moveRight:$moveRight")
         }
         android.os.Handler().postDelayed({ isScaling = false }, DELAY_TIME)
     }
