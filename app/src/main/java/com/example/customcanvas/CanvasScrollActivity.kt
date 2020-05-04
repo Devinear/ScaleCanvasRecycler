@@ -17,6 +17,7 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
     lateinit var scrollView : CanvasScrollView
     lateinit var canvasView : CanvasView // CanvasView // CanvasImageView
 
+    lateinit var btMode : Button
     lateinit var btAdd : Button
     lateinit var btUp : Button
     lateinit var btDown : Button
@@ -44,6 +45,8 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
 
         scrollView.setOnScrollChangeListener(canvasView)
 
+        btMode = findViewById(R.id.btn_mode)
+        btMode.setOnClickListener { clickChangeMode() }
         btAdd = findViewById(R.id.btn_add)
         btAdd.setOnClickListener { clickAddBitmap() }
         btUp = findViewById(R.id.btn_up)
@@ -65,6 +68,10 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         }
         scrollView.setOnTouchListener(this)
         touchSlop = ViewConfiguration.get(applicationContext).scaledTouchSlop.toFloat()
+    }
+
+    private fun clickChangeMode() {
+
     }
 
     private fun clickAddBitmap() {
