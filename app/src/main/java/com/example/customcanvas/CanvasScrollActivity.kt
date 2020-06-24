@@ -88,17 +88,20 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
     }
 
     private fun clickAddBitmap() {
-        Log.d(TAG, "clickAddBitmap")
-
         tempBitmap = Bitmap.createBitmap(900, 1000, Bitmap.Config.ARGB_8888)
+
+        // 0xFFFFFF == 16777215
+        val random = "#${Integer.toHexString(java.util.Random().nextInt(16777216))}"
+        val color = Color.parseColor(random)
+
+        Log.d(TAG, "clickAddBitmap COLOR:[$random]")
         if(tempBitmap != null) {
             val canvas = Canvas(tempBitmap!!)
-            canvas.drawColor(Color.RED)
+            canvas.drawColor(color)
         }
         val info = BitmapInfo(4, 5, 4, 1071, 1547)
         canvasView.addBitmap(tempBitmap!!, info)
 
-//      canvasView.invalidate()    // invalidate는 size가 변경되지 않는다.
         canvasView.requestLayout() // onMeasure를 호출하므로 size가 변경된다.
         verticalView.smoothScrollTo(0, canvasView.height)
     }
