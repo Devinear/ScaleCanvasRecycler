@@ -6,18 +6,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.example.customcanvas.CanvasScrollView
-        android:id="@+id/scrollView"
+        android:id="@+id/view_vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical"
         android:scrollbarSize="10dp"
         android:background="@android:color/black" >
         <com.example.customcanvas.CanvasHorizontalScrollView
+            android:id="@+id/view_horizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scrollbars="none" >
             <com.example.customcanvas.CanvasView
-                android:id="@+id/canvasView"
+                android:id="@+id/view_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:scaleType="matrix"
@@ -108,6 +109,5 @@
         android:text="DOWN"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

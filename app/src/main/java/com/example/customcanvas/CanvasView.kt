@@ -197,7 +197,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
             val moveTop = abs(rectF.top)
             if(rectF.top < 0) {
                 scaleMatrix.postTranslate(0f, moveTop)
-                (context as CanvasScrollActivity).scrollView.scrollBy(0, moveTop.toInt())
+                (context as CanvasScrollActivity).verticalView.scrollBy(0, moveTop.toInt())
             }
 
             val moveLeft = if(rectF.left<0) (scaleWidth-abs(rectF.left)) else 0f

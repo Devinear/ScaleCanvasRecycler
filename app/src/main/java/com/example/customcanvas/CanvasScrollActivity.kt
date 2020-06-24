@@ -7,15 +7,15 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.Button
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlin.math.sqrt
 
 class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnViewChangedListener, View.OnTouchListener {
 
-    lateinit var scrollView : CanvasScrollView
-    lateinit var canvasView : CanvasView // CanvasView // CanvasImageView
+    lateinit var verticalView   : CanvasScrollView
+    lateinit var horizontalView : CanvasHorizontalScrollView
+    lateinit var canvasView     : CanvasView
 
     lateinit var btMode : Button
     lateinit var btAdd : Button
@@ -29,6 +29,7 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
     lateinit var tvFifth : TextView
 
     private var tempBitmap: Bitmap? = null
+    private var viewMode = ViewMode.One
 
     private lateinit var gestureDetector : GestureDetector
     private lateinit var scaleGestureDetector: ScaleGestureDetector
@@ -39,11 +40,12 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_canvas_scoll)
 
-        scrollView = findViewById(R.id.scrollView)
-        canvasView = findViewById(R.id.canvasView)
+        verticalView    = findViewById(R.id.view_vertical)
+        horizontalView  = findViewById(R.id.view_horizontal)
+        canvasView      = findViewById(R.id.view_image)
         canvasView.listener = this
 
-        scrollView.setOnScrollChangeListener(canvasView)
+        verticalView.setOnScrollChangeListener(canvasView)
 
         btMode = findViewById(R.id.btn_mode)
         btMode.setOnClickListener { clickChangeMode() }
@@ -66,12 +68,23 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         for(i in 0..10) {
             clickAddBitmap()
         }
-        scrollView.setOnTouchListener(this)
+        verticalView.setOnTouchListener(this)
         touchSlop = ViewConfiguration.get(applicationContext).scaledTouchSlop.toFloat()
     }
 
     private fun clickChangeMode() {
+        Log.d(TAG, "clickChangeMode ViewMode:$viewMode")
 
+        viewMode = when(viewMode) {
+            ViewMode.One -> {
+                ViewMode.Continuous
+                // To Do
+            }
+            ViewMode.Continuous -> {
+                ViewMode.One
+                // To Do
+            }
+        }
     }
 
     private fun clickAddBitmap() {
@@ -87,18 +100,18 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
 
 //      canvasView.invalidate()    // invalidate는 size가 변경되지 않는다.
         canvasView.requestLayout() // onMeasure를 호출하므로 size가 변경된다.
-        scrollView.smoothScrollTo(0, canvasView.height)
+        verticalView.smoothScrollTo(0, canvasView.height)
     }
 
     private fun clickUpScroll() {
         Log.d(TAG, "clickUpScroll")
-        scrollView.smoothScrollTo(0, 0)
+        verticalView.smoothScrollTo(0, 0)
         canvasView.clickUp()
     }
 
     private fun clickDownScroll() {
         Log.d(TAG, "clickDownScroll")
-        scrollView.smoothScrollTo(0, canvasView.height)
+        verticalView.smoothScrollTo(0, canvasView.height)
     }
 
     private var isDragging = false
