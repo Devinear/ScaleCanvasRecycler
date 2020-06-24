@@ -12,19 +12,13 @@
         android:scrollbars="vertical"
         android:scrollbarSize="10dp"
         android:background="@android:color/black" >
-        <com.example.customcanvas.CanvasHorizontalScrollView
-            android:id="@+id/view_horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="none" >
-            <com.example.customcanvas.CanvasView
-                android:id="@+id/view_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:scaleType="matrix"
-                android:adjustViewBounds="false"
-                android:background="@android:color/transparent" />
-        </com.example.customcanvas.CanvasHorizontalScrollView>
+        <com.example.customcanvas.CanvasView
+            android:id="@+id/view_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="matrix"
+            android:adjustViewBounds="false"
+            android:background="@android:color/transparent" />
     </com.example.customcanvas.CanvasScrollView>
 
     <TextView
