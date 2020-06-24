@@ -91,7 +91,12 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         tempBitmap = Bitmap.createBitmap(900, 1000, Bitmap.Config.ARGB_8888)
 
         // 0xFFFFFF == 16777215
-        val random = "#${Integer.toHexString(java.util.Random().nextInt(16777216))}"
+        var random = "${Integer.toHexString(java.util.Random().nextInt(16777216))}"
+        if(random.length < 6) {
+            for(i in random.length until 6)
+                random = "0${random}"
+        }
+        random = "#${random}"
         val color = Color.parseColor(random)
 
         Log.d(TAG, "clickAddBitmap COLOR:[$random]")
