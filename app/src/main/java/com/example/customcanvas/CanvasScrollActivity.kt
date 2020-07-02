@@ -195,7 +195,7 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
     }
 
     override fun onViewSize(width: Int, height: Int, scale: Float) {
-        Log.d(TAG, "onScaleEnd Width:$width Height:$height Scale:$scale")
+        Log.d(TAG, "onViewSize Width:$width Height:$height Scale:$scale")
         tvFirst.text  = "Width :$width"
         tvSecond.text = "Height:$height"
         tvThird.text  = "Scale :$scale"

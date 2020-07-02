@@ -142,11 +142,11 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
         if (canvasHeight < rectGlobal.height())
             canvasHeight = rectGlobal.height()
-
         canvasHeight -= rectMap.top.toInt()
 
-        if (scaleHeight != canvasHeight) {
-            scaleHeight = canvasHeight
+        val height = (canvasHeight * scaleFactor).toInt()
+        if (height != scaleHeight) {
+            scaleHeight = height
             requestLayout()
         }
         canvas.restore()
@@ -160,12 +160,11 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
         if(!isSetPosYByFitScale && isZoomOut && this.scaleFactor <= 1f) {
             isSetPosYByFitScale = true
-            if(mode == ViewMode.Continuous)
-                posYByFitScale = (positionY.toFloat() / this.scaleFactor).toInt()
+            posYByFitScale = if(mode == ViewMode.Continuous)
+                (positionY.toFloat() / this.scaleFactor).toInt()
             else
-                posYByFitScale = 0 // OnePage
+                0 // OnePage
         }
-
         listener?.onViewSize(width = scaleWidth, height = scaleHeight, scale = scaleFactor)
     }
 
@@ -284,6 +283,15 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
             positionY = posYByFitScale
         }
         else {
+
+            positionY
+//            positionX = rectLocal.left
+//            positionY = rectLocal.top
+//            if(isScaling) {
+//                positionX -= rectMap.left.toInt()
+//                positionY -= rectMap.top.toInt()
+//            }
+
             val moveTop = abs(rectMap.top)
             if(rectMap.top < 0) {
                 scaleMatrix.postTranslate(0f, moveTop)
