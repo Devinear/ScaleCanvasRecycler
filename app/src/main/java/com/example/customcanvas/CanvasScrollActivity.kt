@@ -185,12 +185,14 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
 
     override fun onScaleStart(): Boolean {
         Log.d(TAG, "onScaleStart")
+        scrollView.isVerticalScrollBarEnabled = false
         canvasView.onScaleStart()
         return true
     }
 
     override fun onScaleEnd() {
         Log.d(TAG, "onScaleEnd")
+        scrollView.isVerticalScrollBarEnabled = true
         canvasView.onScaleEnd()
     }
 
