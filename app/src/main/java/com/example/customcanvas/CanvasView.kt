@@ -143,6 +143,8 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         if (canvasHeight < rectGlobal.height())
             canvasHeight = rectGlobal.height()
 
+        canvasHeight -= rectMap.top.toInt()
+
         if (scaleHeight != canvasHeight) {
             scaleHeight = canvasHeight
             requestLayout()
