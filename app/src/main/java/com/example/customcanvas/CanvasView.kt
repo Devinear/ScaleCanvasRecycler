@@ -207,6 +207,9 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         Log.d(TAG, "onSizeChanged WIDTH:[$oldw]>>[$w] HEIGHT:[$oldh]>>[$h]")
         super.onSizeChanged(w, h, oldw, oldh)
         getGlobalVisibleRect(rectGlobal)
+
+        canvasWidth  = w
+        canvasHeight = h
     }
 
     private fun initScale() {
