@@ -17,8 +17,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
     constructor(context: Context, attr: AttributeSet, defStyleAttr: Int) : super(context, attr, defStyleAttr)
 
     val rectGlobal = Rect()
-    var verticalView : CanvasScrollView? = null
-    var horizontalView : CanvasHorizontalScrollView? = null
+    var scrollView : CanvasScrollView? = null
 
     private val listBitmap = mutableListOf<Bitmap>()
     private val listInfo = mutableListOf<BitmapInfo>()
@@ -54,7 +53,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
     private var posYByFitScale = 0
 
     val minScale = 0.8f
-    val maxScale = 2.0f
+    val maxScale = 4.0f
 
     var page = -1
     private var mode = ViewMode.Continuous
@@ -72,8 +71,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
     }
 
     fun initListener() {
-        verticalView?.scrollListener = this
-        horizontalView?.scrollListener = this
+        scrollView?.scrollListener = this
     }
 
     fun changeViewMode(mode: ViewMode) : Boolean {
@@ -96,12 +94,12 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         paintText.color = Color.WHITE
         paintText.textSize = 50f
 
-        val drawPaint = Paint()
-        drawPaint.color = Color.BLACK
+        val paintLine = Paint()
+        paintLine.color = Color.WHITE
 
-        if(!isScaling) {
-            scaleMatrix = Matrix()
-        }
+//        if(!isScaling) {
+//            scaleMatrix = Matrix()
+//        }
 
         val matrix : Matrix = this.matrix
         matrix.set(scaleMatrix)
@@ -138,6 +136,17 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
                 index += 1
                 sumHeight += info.posTop
                 sumHeight += info.height
+
+                val left   = dst.left.toFloat()
+                val top    = dst.top.toFloat()
+                val right  = dst.right.toFloat()
+                val bottom = dst.bottom.toFloat()
+
+                // startX, startY, stopX, stopY
+                canvas.drawLine(left,   top,    right,  top,    paintLine)
+                canvas.drawLine(left,   top,    left,   bottom, paintLine)
+                canvas.drawLine(left,   bottom, right,  bottom, paintLine)
+                canvas.drawLine(right,  top,    right,  bottom, paintLine)
             }
             canvasHeight = sumHeight
         }
@@ -156,9 +165,11 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
         if (canvasHeight < rectGlobal.height())
             canvasHeight = rectGlobal.height()
+        canvasHeight -= rectMap.top.toInt()
 
-        if (scaleHeight != canvasHeight) {
-            scaleHeight = canvasHeight
+        val height = (canvasHeight * scaleFactor).toInt()
+        if (height != scaleHeight) {
+            scaleHeight = height
             requestLayout()
         }
         canvas.restore()
@@ -172,12 +183,11 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
         if(!isSetPosYByFitScale && isZoomOut && this.scaleFactor <= 1f) {
             isSetPosYByFitScale = true
-            if(mode == ViewMode.Continuous)
-                posYByFitScale = (positionY.toFloat() / this.scaleFactor).toInt()
+            posYByFitScale = if(mode == ViewMode.Continuous)
+                (positionY.toFloat() / this.scaleFactor).toInt()
             else
-                posYByFitScale = 0 // OnePage
+                0 // OnePage
         }
-
         listener?.onViewSize(width = scaleWidth, height = scaleHeight, scale = scaleFactor)
     }
 
@@ -224,6 +234,9 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         Log.d(TAG, "onSizeChanged WIDTH:[$oldw]>>[$w] HEIGHT:[$oldh]>>[$h]")
         super.onSizeChanged(w, h, oldw, oldh)
         getGlobalVisibleRect(rectGlobal)
+
+        canvasWidth  = w
+        canvasHeight = h
     }
 
     private fun initScale() {
@@ -277,7 +290,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
     override fun onScaleStart(): Boolean {
         Log.d(TAG, "onScaleStart")
         isScaling = true
-        scaleMatrix = Matrix()
+//        scaleMatrix = Matrix()
 
         if(this.scaleFactor == 1.0f) {
             posYByFitScale = positionY
@@ -300,10 +313,19 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
             positionY = posYByFitScale
         }
         else {
+
+            positionY
+//            positionX = rectLocal.left
+//            positionY = rectLocal.top
+//            if(isScaling) {
+//                positionX -= rectMap.left.toInt()
+//                positionY -= rectMap.top.toInt()
+//            }
+
             val moveTop = abs(rectMap.top)
             if(rectMap.top < 0) {
                 scaleMatrix.postTranslate(0f, moveTop)
-                (context as CanvasScrollActivity).verticalView.scrollBy(0, moveTop.toInt())
+                (context as CanvasScrollActivity).scrollView.scrollBy(0, moveTop.toInt())
             }
 
             val moveLeft = if(rectMap.left<0) (scaleWidth-abs(rectMap.left)) else 0f

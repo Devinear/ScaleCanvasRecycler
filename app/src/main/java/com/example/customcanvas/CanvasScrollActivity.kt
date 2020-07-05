@@ -13,9 +13,8 @@ import kotlin.math.sqrt
 
 class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnViewChangedListener, View.OnTouchListener, OnGestureListener {
 
-    lateinit var verticalView   : CanvasScrollView
-    lateinit var horizontalView : CanvasHorizontalScrollView
-    lateinit var canvasView     : CanvasView
+    lateinit var scrollView : CanvasScrollView
+    lateinit var canvasView : CanvasView
 
     lateinit var btMode : Button
     lateinit var btAdd : Button
@@ -40,15 +39,13 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_canvas_scoll)
 
-        verticalView    = findViewById(R.id.view_vertical)
-        horizontalView  = findViewById(R.id.view_horizontal)
+        scrollView    = findViewById(R.id.view_vertical)
         canvasView      = findViewById(R.id.view_image)
         canvasView.listener = this
-        canvasView.verticalView = verticalView
-        canvasView.horizontalView = horizontalView
+        canvasView.scrollView = scrollView
         canvasView.initListener()
 
-        verticalView.setOnScrollChangeListener(canvasView)
+        scrollView.setOnScrollChangeListener(canvasView)
 
         btMode = findViewById(R.id.btn_mode)
         btMode.setOnClickListener { clickChangeMode() }
@@ -71,7 +68,7 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         for(i in 0..10) {
             clickAddBitmap()
         }
-        verticalView.setOnTouchListener(this)
+        scrollView.setOnTouchListener(this)
         touchSlop = ViewConfiguration.get(applicationContext).scaledTouchSlop.toFloat()
     }
 
@@ -112,18 +109,18 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         canvasView.addBitmap(tempBitmap!!, info)
 
         canvasView.requestLayout() // onMeasure를 호출하므로 size가 변경된다.
-        verticalView.smoothScrollTo(0, canvasView.height)
+        scrollView.smoothScrollTo(0, canvasView.height)
     }
 
     private fun clickUpScroll() {
         Log.d(TAG, "clickUpScroll")
-        verticalView.smoothScrollTo(0, 0)
+        scrollView.smoothScrollTo(0, 0)
         canvasView.clickUp()
     }
 
     private fun clickDownScroll() {
         Log.d(TAG, "clickDownScroll")
-        verticalView.smoothScrollTo(0, canvasView.height)
+        scrollView.smoothScrollTo(0, canvasView.height)
     }
 
     private var isDragging = false
@@ -136,46 +133,46 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         Log.d(TAG, "onTouch Action:${event?.action}")
         val ret = scaleGestureDetector.onTouchEvent(event)
 
-//        when(event.action) {
-//            MotionEvent.ACTION_DOWN -> {
-//                lastTouchX = event.x
-//                lastTouchY = event.y
-//                isDragging = false
-//            }
-//            MotionEvent.ACTION_MOVE -> {
-//                val x = event.x
-//                val y = event.y
-//                val dx = x - lastTouchX
-//                val dy = y - lastTouchY
-//
-//                if(!isDragging && !canvasView.scaling) {
-//                    isDragging = sqrt((dx*dx)+(dy*dy)) >= touchSlop
-//                    if(isDragging) {
-//                        canvasView.onDragStart(x, y)
-//                    }
-//                }
-//                if((dx > 0 && canvasView.canDragStart) || (dx < 0 && canvasView.canDragEnd)) {
-//                    if(isDragging) {
-//                        canvasView.onDrag(dx, dy, x, y)
-//                        lastTouchX = x
-//                        lastTouchY = y
-//                    }
-//                }
-//                else {
-//                    isDragging = false
-//                }
-//            }
-//            MotionEvent.ACTION_UP -> {
-//                if(isDragging)
-//                    canvasView.onDragEnd()
-//                isDragging = false
-//            }
-//            MotionEvent.ACTION_CANCEL -> {
-//                if(isDragging)
-//                    canvasView.onDragEnd()
-//                isDragging = false
-//            }
-//        }
+        when(event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                lastTouchX = event.x
+                lastTouchY = event.y
+                isDragging = false
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val x = event.x
+                val y = event.y
+                val dx = x - lastTouchX
+                val dy = y - lastTouchY
+
+                if(!isDragging && !canvasView.scaling) {
+                    isDragging = sqrt((dx*dx)+(dy*dy)) >= touchSlop
+                    if(isDragging) {
+                        canvasView.onDragStart(x, y)
+                    }
+                }
+                if((dx > 0 && canvasView.canDragStart) || (dx < 0 && canvasView.canDragEnd)) {
+                    if(isDragging) {
+                        canvasView.onDrag(dx, dy, x, y)
+                        lastTouchX = x
+                        lastTouchY = y
+                    }
+                }
+                else {
+                    isDragging = false
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                if(isDragging)
+                    canvasView.onDragEnd()
+                isDragging = false
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                if(isDragging)
+                    canvasView.onDragEnd()
+                isDragging = false
+            }
+        }
         Log.d(TAG, "onTouch Return:$ret")
         return false
     }
@@ -207,17 +204,19 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
 
     override fun onScaleStart(): Boolean {
         Log.d(TAG, "onScaleStart")
+        scrollView.isVerticalScrollBarEnabled = false
         canvasView.onScaleStart()
         return true
     }
 
     override fun onScaleEnd() {
         Log.d(TAG, "onScaleEnd")
+        scrollView.isVerticalScrollBarEnabled = true
         canvasView.onScaleEnd()
     }
 
     override fun onViewSize(width: Int, height: Int, scale: Float) {
-        Log.d(TAG, "onScaleEnd Width:$width Height:$height Scale:$scale")
+        Log.d(TAG, "onViewSize Width:$width Height:$height Scale:$scale")
         tvFirst.text  = "Width :$width"
         tvSecond.text = "Height:$height"
         tvThird.text  = "Scale :$scale"
