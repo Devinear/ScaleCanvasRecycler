@@ -11,7 +11,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlin.math.sqrt
 
-class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnViewChangedListener, View.OnTouchListener {
+class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnViewChangedListener, View.OnTouchListener, OnGestureListener {
 
     lateinit var verticalView   : CanvasScrollView
     lateinit var horizontalView : CanvasHorizontalScrollView
@@ -65,7 +65,7 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         tvForth = findViewById(R.id.tv_forth)
         tvFifth = findViewById(R.id.tv_fifth)
 
-        gestureDetector = GestureDetector(applicationContext, GestureListener())
+        gestureDetector = GestureDetector(applicationContext, OnGestureDetectorListener(this))
         scaleGestureDetector = ScaleGestureDetector(applicationContext, ScaleGestureListener(this))
 
         for(i in 0..10) {
@@ -178,6 +178,22 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
 //        }
         Log.d(TAG, "onTouch Return:$ret")
         return false
+    }
+
+    override fun onFling(isX: Boolean, isNext: Boolean) {
+        Log.d(TAG, "onFling IsX:$isX IsNext:$isNext")
+    }
+
+    override fun onSingleTap(ev: MotionEvent) {
+        Log.d(TAG, "onSingleTap")
+    }
+
+    override fun onLongPress(ev: MotionEvent) {
+        Log.d(TAG, "onLongPress")
+    }
+
+    override fun onDoubleTap(ev: MotionEvent) {
+        Log.d(TAG, "onDoubleTap")
     }
 
     override fun onScaleChange(scaleFactor: Float, focusX: Float, focusY: Float): Boolean {
