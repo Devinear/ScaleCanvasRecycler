@@ -182,6 +182,9 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
 
     override fun onFling(isX: Boolean, isNext: Boolean) {
         Log.d(TAG, "onFling IsX:$isX IsNext:$isNext")
+        if(canvasView.pageMode == ViewMode.One) {
+            canvasView.movePage(isX = isX, isNext = isNext)
+        }
     }
 
     override fun onSingleTap(ev: MotionEvent) {

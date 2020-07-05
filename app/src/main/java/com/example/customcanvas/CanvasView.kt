@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.toRectF
 import kotlin.math.abs
 
 class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnScrollChangeListener, OnScrollChangedListener {
@@ -55,7 +56,10 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
     val minScale = 0.8f
     val maxScale = 2.0f
 
+    var page = -1
     private var mode = ViewMode.Continuous
+    val pageMode : ViewMode
+        get() = mode
 
     private var positionX = 0
     private var positionY = 0
@@ -72,10 +76,15 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         horizontalView?.scrollListener = this
     }
 
-    fun changeViewMode(mode: ViewMode) {
+    fun changeViewMode(mode: ViewMode) : Boolean {
         Log.d(TAG, "changeViewMode MODE:[${this.mode}]>>[$mode]")
+        if(this.mode == mode) return false
         this.mode = mode
+
+        page = 1
+
         invalidate()
+        return true
     }
 
     @SuppressLint("DrawAllocation")
@@ -111,26 +120,39 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         var index = 1
         var sumHeight = 0
 
-        listBitmap.indices.forEach {
-            val bitmap = listBitmap[it]
-            val info = listInfo[it]
+        if(mode == ViewMode.Continuous) {
+            listBitmap.indices.forEach {
+                val bitmap = listBitmap[it]
+                val info = listInfo[it]
 
-            val src = Rect(0, 0, bitmap.width, bitmap.height)
-            val dst = Rect(
-                info.marginStart,
-                sumHeight,
-                info.marginStart + info.width,
-                sumHeight + info.height
-            )
-            canvas.drawBitmap(bitmap, src, dst, null)
-            canvas.drawText("Page:$index / ${dst.top}", 10f, (dst.top + 50f), paintText)
+                val src = Rect(0, 0, bitmap.width, bitmap.height)
+                val dst = Rect(
+                    info.marginStart,
+                    sumHeight,
+                    info.marginStart + info.width,
+                    sumHeight + info.height
+                )
+                canvas.drawBitmap(bitmap, src, dst, null)
+                canvas.drawText("Page:$index / ${dst.top}", 10f, (dst.top + 50f), paintText)
 
-            index += 1
-            sumHeight += info.posTop
-            sumHeight += info.height
-
+                index += 1
+                sumHeight += info.posTop
+                sumHeight += info.height
+            }
+            canvasHeight = sumHeight
         }
-        canvasHeight = sumHeight
+        else {
+            if(listBitmap.size >= page) {
+                val image = listBitmap[page-1]
+                val src = Rect(0, 0, image.width, image.height)
+
+                val left = if(image.width < displayWidth)   (displayWidth-image.width)/2   else 0
+                val top  = if(image.height < displayHeight) (displayHeight-image.height)/2 else 0
+                val dst = Rect(left, top, left+image.width, top+image.height)
+                canvas.drawBitmap(image, src, dst, null)
+                canvasHeight = dst.bottom
+            }
+        }
 
         if (canvasHeight < rectGlobal.height())
             canvasHeight = rectGlobal.height()
@@ -161,6 +183,10 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
     // 음수가 나올 수 있음.
     private fun getStartPosition(width: Int) : Int = (displaySize.x-width)/2
+
+    fun movePage(isX: Boolean, isNext: Boolean) : Boolean {
+        return false
+    }
 
     fun addBitmap(bitmap: Bitmap, info: BitmapInfo) {
         Log.d(TAG, "addBitmap width:${bitmap.width} height:${bitmap.height}")
