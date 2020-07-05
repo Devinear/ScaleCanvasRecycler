@@ -3,7 +3,7 @@ package com.example.customcanvas
 import android.view.GestureDetector
 import android.view.MotionEvent
 
-class OnGestureListener() : GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
+class OnGestureDetectorListener() : GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
     override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean = false
 
