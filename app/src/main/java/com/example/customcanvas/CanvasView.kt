@@ -60,6 +60,10 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
     val pageMode : ViewMode
         get() = mode
 
+    private var state = ViewState.FitWidth
+    val pageState : ViewState
+        get() = state
+
     private var positionX = 0
     private var positionY = 0
 
@@ -158,9 +162,25 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
                 val width  = rectGlobal.width()
                 val height = rectGlobal.height()
 
-                val left = if(image.width < width)   (width-image.width)/2   else 0
-                val top  = if(image.height < height) (height-image.height)/2 else 0
-                val dst = Rect(left, top, left+image.width, top+image.height)
+                val dst =
+                    when (state) {
+                        ViewState.FitWidth  -> {
+                            val fitHeight = (image.height * width / image.width.toFloat()).toInt()
+                            val top = if(fitHeight < height) (height-fitHeight)/2 else 0
+                            Rect(0, top, width, top+fitHeight)
+                        }
+                        ViewState.FitHeight -> {
+                            val fitWidth = (image.width * height / image.height.toFloat()).toInt()
+                            val left = if(fitWidth < width) (width-fitWidth)/2 else 0
+                            Rect(left, 0, left+fitWidth, height)
+                        }
+                        else -> {
+                            val left = if(image.width < width)   (width-image.width)/2   else 0
+                            val top  = if(image.height < height) (height-image.height)/2 else 0
+                            Rect(left, top, left+image.width, top+image.height)
+                        }
+                    }
+
                 canvas.drawBitmap(image, src, dst, null)
                 canvasHeight = dst.bottom
             }
