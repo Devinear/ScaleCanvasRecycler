@@ -155,8 +155,11 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
                 val image = listBitmap[page-1]
                 val src = Rect(0, 0, image.width, image.height)
 
-                val left = if(image.width < displayWidth)   (displayWidth-image.width)/2   else 0
-                val top  = if(image.height < displayHeight) (displayHeight-image.height)/2 else 0
+                val width  = rectGlobal.width()
+                val height = rectGlobal.height()
+
+                val left = if(image.width < width)   (width-image.width)/2   else 0
+                val top  = if(image.height < height) (height-image.height)/2 else 0
                 val dst = Rect(left, top, left+image.width, top+image.height)
                 canvas.drawBitmap(image, src, dst, null)
                 canvasHeight = dst.bottom
