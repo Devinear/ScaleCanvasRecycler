@@ -28,11 +28,8 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
     lateinit var tvFifth : TextView
 
     private var tempBitmap: Bitmap? = null
-    private var viewMode = ViewMode.One
-
     private lateinit var gestureDetector : GestureDetector
     private lateinit var scaleGestureDetector: ScaleGestureDetector
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate")
@@ -73,19 +70,8 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
     }
 
     private fun clickChangeMode() {
-        Log.d(TAG, "clickChangeMode ViewMode:$viewMode")
-
-        viewMode = when(viewMode) {
-            ViewMode.One -> {
-                ViewMode.Continuous
-                // To Do
-            }
-            ViewMode.Continuous -> {
-                ViewMode.One
-                // To Do
-            }
-        }
-        canvasView.changeViewMode(viewMode)
+        Log.d(TAG, "clickChangeMode")
+        canvasView.changeViewMode()
     }
 
     private fun clickAddBitmap() {

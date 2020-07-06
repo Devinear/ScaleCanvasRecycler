@@ -78,13 +78,13 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         scrollView?.scrollListener = this
     }
 
-    fun changeViewMode(mode: ViewMode) : Boolean {
-        Log.d(TAG, "changeViewMode MODE:[${this.mode}]>>[$mode]")
-        if(this.mode == mode) return false
-        this.mode = mode
-
+    fun changeViewMode() : Boolean {
+        Log.d(TAG, "changeViewMode")
+        mode = when(mode) {
+            ViewMode.One -> ViewMode.Continuous
+            ViewMode.Continuous -> ViewMode.One
+        }
         page = 1
-
         invalidate()
         return true
     }
