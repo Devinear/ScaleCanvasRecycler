@@ -1,5 +1,6 @@
 package com.example.customcanvas
 
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -69,6 +70,16 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         touchSlop = ViewConfiguration.get(applicationContext).scaledTouchSlop.toFloat()
     }
 
+    var curOrientation : Int = 0
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        val newOrientation = newConfig.orientation
+        if(curOrientation != newOrientation) {
+            curOrientation = newOrientation
+            canvasView.changeOrientation(orientation = curOrientation)
+        }
+    }
+
     private fun clickChangeMode() {
         Log.d(TAG, "clickChangeMode")
         canvasView.changeViewMode()
@@ -95,7 +106,7 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         canvasView.addBitmap(tempBitmap!!, info)
 
         canvasView.requestLayout() // onMeasure를 호출하므로 size가 변경된다.
-        scrollView.smoothScrollTo(0, canvasView.height)
+//        scrollView.smoothScrollTo(0, canvasView.height)
     }
 
     private fun clickUpScroll() {

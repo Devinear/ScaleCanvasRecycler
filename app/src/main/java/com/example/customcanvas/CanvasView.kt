@@ -2,12 +2,13 @@ package com.example.customcanvas
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.*
+import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.toRectF
 import kotlin.math.abs
 
 class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnScrollChangeListener, OnScrollChangedListener {
@@ -27,12 +28,12 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
     private var scaleWidth  : Int = 0
     private var scaleHeight : Int = 0
 
-    private val displaySize = Point()
+    private val screenSize = Point()
     var isPortrait: Boolean = true
-    val displayWidth: Int
-        get() = if(isPortrait) displaySize.x else displaySize.y
-    val displayHeight: Int
-        get() = if(isPortrait) displaySize.y else displaySize.x
+    val screenWidth: Int
+        get() = screenSize.x
+    val screenHeight: Int
+        get() = screenSize.y
 
     private var isScaling = false
     val scaling : Boolean;  get() = isScaling
@@ -71,7 +72,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
 
 
     init {
-        (context as AppCompatActivity).windowManager.defaultDisplay.getSize(displaySize)
+        (context as AppCompatActivity).windowManager.defaultDisplay.getSize(screenSize)
     }
 
     fun initListener() {
@@ -87,6 +88,12 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         page = 1
         invalidate()
         return true
+    }
+
+    fun changeOrientation(orientation: Int) {
+        Log.d(TAG, "changeOrientation orientation:$orientation")
+        isPortrait = orientation == Configuration.ORIENTATION_PORTRAIT
+        (context as AppCompatActivity).windowManager.defaultDisplay.getSize(screenSize)
     }
 
     @SuppressLint("DrawAllocation")
@@ -215,7 +222,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
     }
 
     // 음수가 나올 수 있음.
-    private fun getStartPosition(width: Int) : Int = (displaySize.x-width)/2
+    private fun getStartPosition(width: Int) : Int = (screenSize.x-width)/2
 
     fun movePage(isX: Boolean, isNext: Boolean) : Boolean {
         return false
@@ -231,7 +238,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         scaleHeight = canvasHeight
 
         // 초기...?
-        canvasWidth = displaySize.x
+        canvasWidth = screenSize.x
         scaleWidth = canvasWidth
     }
 
@@ -305,7 +312,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         scaleMatrix.postScale(scale, scale, x, y)
         listener?.onPivotPoint(x, y)
 
-        scaleWidth  = ((displayWidth) * (this.scaleFactor)).toInt()
+        scaleWidth  = ((screenWidth) * (this.scaleFactor)).toInt()
         invalidate()
         return true
     }
@@ -352,7 +359,7 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
             }
 
             val moveLeft = if(rectMap.left<0) (scaleWidth-abs(rectMap.left)) else 0f
-            val moveRight = if(rectMap.left + scaleWidth < displaySize.x) (displaySize.x - (rectMap.left + scaleWidth)) else 0f
+            val moveRight = if(rectMap.left + scaleWidth < screenSize.x) (screenSize.x - (rectMap.left + scaleWidth)) else 0f
             if(moveRight > 0) {
                 scaleMatrix.postTranslate(moveRight, 0f)
             }
@@ -410,8 +417,8 @@ class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnS
         var posEnd = (info.marginStart+info.width+info.marginEnd)*scaleFactor
         posEnd += rectF.left
 
-        canDraggingEnd = (posEnd > displaySize.x)
-        return posEnd-displaySize.x
+        canDraggingEnd = (posEnd > screenSize.x)
+        return posEnd-screenSize.x
     }
 
     override fun onDragEnd() {
