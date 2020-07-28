@@ -21,18 +21,18 @@ class CanvasScrollActivity : AppCompatActivity(),
     OnGestureListener {
 
     lateinit var scrollView : CanvasScrollView
-    lateinit var canvasView : CanvasView
+    private lateinit var canvasView : CanvasView
 
-    lateinit var btMode : Button
-    lateinit var btAdd : Button
-    lateinit var btUp : Button
-    lateinit var btDown : Button
+    private lateinit var btMode : Button
+    private lateinit var btAdd : Button
+    private lateinit var btUp : Button
+    private lateinit var btDown : Button
 
-    lateinit var tvFirst : TextView
-    lateinit var tvSecond: TextView
-    lateinit var tvThird : TextView
-    lateinit var tvForth : TextView
-    lateinit var tvFifth : TextView
+    private lateinit var tvFirst : TextView
+    private lateinit var tvSecond: TextView
+    private lateinit var tvThird : TextView
+    private lateinit var tvForth : TextView
+    private lateinit var tvFifth : TextView
 
     private var tempBitmap: Bitmap? = null
     private lateinit var gestureDetector : GestureDetector

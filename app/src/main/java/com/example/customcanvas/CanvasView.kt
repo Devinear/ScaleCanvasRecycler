@@ -25,7 +25,7 @@ class CanvasView : View,
     constructor(context: Context, attr: AttributeSet) : super(context, attr)
     constructor(context: Context, attr: AttributeSet, defStyleAttr: Int) : super(context, attr, defStyleAttr)
 
-    val rectGlobal = Rect()
+    private val rectGlobal = Rect()
     var scrollView : CanvasScrollView? = null
 
     private val listBitmap = mutableListOf<Bitmap>()
@@ -37,7 +37,7 @@ class CanvasView : View,
     private var scaleHeight : Int = 0
 
     private val screenSize = Point()
-    var isPortrait: Boolean = true
+    private var isPortrait: Boolean = true
     val screenWidth: Int
         get() = screenSize.x
     val screenHeight: Int
