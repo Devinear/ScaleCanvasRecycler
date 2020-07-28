@@ -4,14 +4,22 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.*
-import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.example.customcanvas.data.BitmapInfo
+import com.example.customcanvas.common.ViewMode
+import com.example.customcanvas.common.ViewState
+import com.example.customcanvas.listener.OnScaleChangedListener
+import com.example.customcanvas.listener.OnScrollChangedListener
+import com.example.customcanvas.listener.OnViewChangedListener
 import kotlin.math.abs
 
-class CanvasView : View, OnScaleChangedListener, OnDragChangedListener, View.OnScrollChangeListener, OnScrollChangedListener {
+class CanvasView : View,
+    OnScaleChangedListener,
+    _root_ide_package_.com.example.customcanvas.listener.OnDragChangedListener, View.OnScrollChangeListener,
+    OnScrollChangedListener {
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attr: AttributeSet) : super(context, attr)

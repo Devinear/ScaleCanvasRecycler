@@ -1,4 +1,4 @@
-package com.example.customcanvas
+package com.example.customcanvas.common
 
 enum class ViewMode {
     One, Continuous

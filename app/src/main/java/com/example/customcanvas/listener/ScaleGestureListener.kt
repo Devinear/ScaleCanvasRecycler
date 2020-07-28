@@ -1,4 +1,4 @@
-package com.example.customcanvas
+package com.example.customcanvas.listener
 
 import android.util.Log
 import android.view.ScaleGestureDetector

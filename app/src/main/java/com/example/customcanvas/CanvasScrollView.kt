@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.ScrollView
+import com.example.customcanvas.listener.OnScrollChangedListener
 
 class CanvasScrollView : ScrollView {
 

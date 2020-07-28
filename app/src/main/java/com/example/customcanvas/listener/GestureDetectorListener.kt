@@ -1,10 +1,10 @@
-package com.example.customcanvas
+package com.example.customcanvas.listener
 
 import android.view.GestureDetector
 import android.view.MotionEvent
 import kotlin.math.abs
 
-class OnGestureDetectorListener(val listener: OnGestureListener) : GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
+class GestureDetectorListener(val listener: OnGestureListener) : GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
     override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
         if(e1 == null || e2 == null)

@@ -1,4 +1,4 @@
-package com.example.customcanvas
+package com.example.customcanvas.listener
 
 interface OnViewChangedListener {
     fun onViewSize(width: Int, height: Int, scale: Float)

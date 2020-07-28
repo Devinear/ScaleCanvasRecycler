@@ -1,4 +1,4 @@
-package com.example.customcanvas
+package com.example.customcanvas.listener
 
 interface OnDragChangedListener {
     fun onDrag(dx: Float, dy: Float, focusX: Float, focusY: Float)

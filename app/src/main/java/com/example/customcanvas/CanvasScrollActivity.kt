@@ -10,9 +10,15 @@ import android.view.*
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.customcanvas.data.BitmapInfo
+import com.example.customcanvas.common.ViewMode
+import com.example.customcanvas.listener.*
 import kotlin.math.sqrt
 
-class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnViewChangedListener, View.OnTouchListener, OnGestureListener {
+class CanvasScrollActivity : AppCompatActivity(),
+    OnScaleChangedListener,
+    OnViewChangedListener, View.OnTouchListener,
+    OnGestureListener {
 
     lateinit var scrollView : CanvasScrollView
     lateinit var canvasView : CanvasView
@@ -60,8 +66,12 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
         tvForth = findViewById(R.id.tv_forth)
         tvFifth = findViewById(R.id.tv_fifth)
 
-        gestureDetector = GestureDetector(applicationContext, OnGestureDetectorListener(this))
-        scaleGestureDetector = ScaleGestureDetector(applicationContext, ScaleGestureListener(this))
+        gestureDetector = GestureDetector(applicationContext,
+            GestureDetectorListener(this)
+        )
+        scaleGestureDetector = ScaleGestureDetector(applicationContext,
+            ScaleGestureListener(this)
+        )
 
         for(i in 0..10) {
             clickAddBitmap()
@@ -102,7 +112,8 @@ class CanvasScrollActivity : AppCompatActivity(), OnScaleChangedListener, OnView
             val canvas = Canvas(tempBitmap!!)
             canvas.drawColor(color)
         }
-        val info = BitmapInfo(4, 5, 4, 1071, 1547)
+        val info =
+            BitmapInfo(4, 5, 4, 1071, 1547)
         canvasView.addBitmap(tempBitmap!!, info)
 
         canvasView.requestLayout() // onMeasure를 호출하므로 size가 변경된다.
