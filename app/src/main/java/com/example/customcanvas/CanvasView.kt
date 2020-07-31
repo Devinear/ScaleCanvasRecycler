@@ -233,7 +233,16 @@ class CanvasView : View,
     private fun getStartPosition(width: Int) : Int = (screenSize.x-width)/2
 
     fun movePage(isX: Boolean, isNext: Boolean) : Boolean {
-        return false
+        if(isNext) {
+            if(page == listInfo.size) return false
+            page += 1
+        }
+        else {
+            if(page == 1) return false
+            page -= 1
+        }
+        invalidate()
+        return true
     }
 
     fun addBitmap(bitmap: Bitmap, info: BitmapInfo) {
