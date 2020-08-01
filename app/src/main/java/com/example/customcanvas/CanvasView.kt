@@ -171,6 +171,7 @@ class CanvasView : View,
         else {
             if(listBitmap.size >= page) {
                 val image = listBitmap[page-1]
+                val info = listInfo[page-1]
                 val src = Rect(0, 0, image.width, image.height)
 
                 val width  = rectGlobal.width()
@@ -179,19 +180,19 @@ class CanvasView : View,
                 val dst =
                     when (state) {
                         ViewState.FitWidth  -> {
-                            val fitHeight = (image.height * width / image.width.toFloat()).toInt()
+                            val fitHeight = (info.height * width / info.width.toFloat()).toInt()
                             val top = if(fitHeight < height) (height-fitHeight)/2 else 0
                             Rect(0, top, width, top+fitHeight)
                         }
                         ViewState.FitHeight -> {
-                            val fitWidth = (image.width * height / image.height.toFloat()).toInt()
+                            val fitWidth = (info.width * height / info.height.toFloat()).toInt()
                             val left = if(fitWidth < width) (width-fitWidth)/2 else 0
                             Rect(left, 0, left+fitWidth, height)
                         }
                         else -> {
-                            val left = if(image.width < width)   (width-image.width)/2   else 0
-                            val top  = if(image.height < height) (height-image.height)/2 else 0
-                            Rect(left, top, left+image.width, top+image.height)
+                            val left = if(info.width < width)   (width-info.width)/2   else 0
+                            val top  = if(info.height < height) (height-info.height)/2 else 0
+                            Rect(left, top, left+info.width, top+info.height)
                         }
                     }
 
@@ -232,7 +233,16 @@ class CanvasView : View,
     private fun getStartPosition(width: Int) : Int = (screenSize.x-width)/2
 
     fun movePage(isX: Boolean, isNext: Boolean) : Boolean {
-        return false
+        if(isNext) {
+            if(page == listInfo.size) return false
+            page += 1
+        }
+        else {
+            if(page == 1) return false
+            page -= 1
+        }
+        invalidate()
+        return true
     }
 
     fun addBitmap(bitmap: Bitmap, info: BitmapInfo) {

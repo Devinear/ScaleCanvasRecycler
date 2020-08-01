@@ -140,6 +140,7 @@ class CanvasScrollActivity : AppCompatActivity(),
         if(event == null) return false
         Log.d(TAG, "onTouch Action:${event?.action}")
         val ret = scaleGestureDetector.onTouchEvent(event)
+        gestureDetector.onTouchEvent(event)
 
         when(event.action) {
             MotionEvent.ACTION_DOWN -> {
