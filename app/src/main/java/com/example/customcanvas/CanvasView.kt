@@ -110,7 +110,7 @@ class CanvasView : View,
 
         val paintText = Paint()
         paintText.color = Color.WHITE
-        paintText.textSize = 50f
+        paintText.textSize = 100f
 
         val paintLine = Paint()
         paintLine.color = Color.WHITE
@@ -149,7 +149,7 @@ class CanvasView : View,
                     sumHeight + info.height
                 )
                 canvas.drawBitmap(bitmap, src, dst, null)
-                canvas.drawText("Page:$index / ${dst.top}", 10f, (dst.top + 50f), paintText)
+                canvas.drawText("Page:${it+1} / ${dst.top}", 10f, (dst.top + 200f), paintText)
 
                 index += 1
                 sumHeight += info.posTop
@@ -197,6 +197,7 @@ class CanvasView : View,
                     }
 
                 canvas.drawBitmap(image, src, dst, null)
+                canvas.drawText("Page:$page / ${dst.top}", 10f, (dst.top + 100f), paintText)
                 canvasHeight = dst.bottom
             }
         }
