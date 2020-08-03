@@ -17,6 +17,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.example.customcanvas.CanvasScrollActivity" />
+        <activity android:name="com.example.customcanvas.GalleryActivity" />
     </application>
 
 </manifest>
